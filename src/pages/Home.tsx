@@ -1,13 +1,14 @@
 
-import React, { useEffect, useState } from 'react';
-import { useSafeMap } from '@/hooks/useSafeMap';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, MessageSquare } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import mapboxgl from 'mapbox-gl';
+import type { Map } from 'mapbox-gl';
 
 const Home = () => {
+  const mapRef = useRef<Map | null>(null);
   const [mapInitialized, setMapInitialized] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
@@ -24,12 +25,36 @@ const Home = () => {
   }, []);
 
   // Initialize map only after token is set
-  const mapInstance = mapInitialized ? useSafeMap({
-    containerId: 'map',
-    style: 'mapbox://styles/mapbox/dark-v11',
-    center: [-122.42, 37.77],
-    initialZoom: 13,
-  }) : undefined;
+  useEffect(() => {
+    if (!mapInitialized) return;
+    
+    const container = document.getElementById('map');
+    if (!container || mapRef.current) return;
+
+    try {
+      const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: [-122.42, 37.77],
+        zoom: 13,
+      });
+
+      map.on('style.load', () => {
+        const event = new CustomEvent('safe-map-ready');
+        window.dispatchEvent(event);
+      });
+
+      mapRef.current = map;
+
+      return () => {
+        map.remove();
+        mapRef.current = null;
+      };
+    } catch (error) {
+      console.error('Error creating map:', error);
+      setMapError("Error creating map. Please check your browser console for more information.");
+    }
+  }, [mapInitialized]);
 
   return (
     <div className="relative h-screen w-full">
