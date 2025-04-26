@@ -8,6 +8,8 @@ export function parseCSV(csvText: string): Record<string, string>[] {
   // Split by lines and filter out empty lines
   const lines = csvText.split('\n').filter(line => line.trim());
   
+  if (lines.length === 0) return [];
+  
   // Get headers from the first line
   const headers = lines[0].split(',').map(header => header.trim());
   
@@ -26,3 +28,4 @@ export function parseCSV(csvText: string): Record<string, string>[] {
   
   return result;
 }
+

@@ -1,12 +1,13 @@
+import { parseCSV } from './csvParser';
 
-type CrimeDataPoint = {
+export interface CrimeDataPoint {
   latitude: number;
   longitude: number;
   frequency: number;
-};
+}
 
-export const crimeDataToGeoJSON = (crimeData: CrimeDataPoint[]): GeoJSON.FeatureCollection => {
-  const features: GeoJSON.Feature[] = crimeData.map(point => ({
+export function crimeDataToGeoJSON(data: CrimeDataPoint[]): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = data.map(point => ({
     type: 'Feature',
     geometry: {
       type: 'Point',
@@ -21,220 +22,440 @@ export const crimeDataToGeoJSON = (crimeData: CrimeDataPoint[]): GeoJSON.Feature
     type: 'FeatureCollection',
     features
   };
-};
+}
 
-// Sample crime data points for San Francisco
-export const crimeData: CrimeDataPoint[] = [
-  { latitude: 37.708, longitude: -122.4623, frequency: 2 },
-  { latitude: 37.7082, longitude: -122.4523, frequency: 2 },
-  { latitude: 37.7083, longitude: -122.4543, frequency: 2 },
-  { latitude: 37.7083, longitude: -122.4201, frequency: 12 },
-  { latitude: 37.7085, longitude: -122.4617, frequency: 1 },
-  { latitude: 37.7085, longitude: -122.4209, frequency: 1 },
-  { latitude: 37.7086, longitude: -122.4448, frequency: 2 },
-  { latitude: 37.7086, longitude: -122.4013, frequency: 8 },
-  { latitude: 37.7087, longitude: -122.4704, frequency: 3 },
-  { latitude: 37.7087, longitude: -122.4693, frequency: 1 },
-  { latitude: 37.7087, longitude: -122.4423, frequency: 5 },
-  { latitude: 37.7087, longitude: -122.415, frequency: 1 },
-  { latitude: 37.7089, longitude: -122.426, frequency: 1 },
-  { latitude: 37.7089, longitude: -122.4223, frequency: 3 },
-  { latitude: 37.7089, longitude: -122.4051, frequency: 27 },
-  { latitude: 37.7089, longitude: -122.3944, frequency: 6 },
-  { latitude: 37.709, longitude: -122.4582, frequency: 2 },
-  { latitude: 37.709, longitude: -122.416, frequency: 3 },
-  { latitude: 37.7091, longitude: -122.4477, frequency: 2 },
-  { latitude: 37.7091, longitude: -122.406, frequency: 2 },
-  { latitude: 37.7092, longitude: -122.4643, frequency: 1 },
-  { latitude: 37.7092, longitude: -122.4558, frequency: 3 },
-  { latitude: 37.7092, longitude: -122.4532, frequency: 8 },
-  { latitude: 37.7092, longitude: -122.4229, frequency: 5 },
-  { latitude: 37.7092, longitude: -122.4062, frequency: 1 },
-  { latitude: 37.7093, longitude: -122.4427, frequency: 5 },
-  { latitude: 37.7093, longitude: -122.4261, frequency: 1 },
-  { latitude: 37.7094, longitude: -122.4509, frequency: 1 },
-  { latitude: 37.7094, longitude: -122.4467, frequency: 4 },
-  { latitude: 37.7095, longitude: -122.4577, frequency: 3 },
-  { latitude: 37.7095, longitude: -122.4177, frequency: 3 },
-  { latitude: 37.7095, longitude: -122.4129, frequency: 3 },
-  { latitude: 37.7096, longitude: -122.4679, frequency: 2 },
-  { latitude: 37.7096, longitude: -122.4347, frequency: 1 },
-  { latitude: 37.7097, longitude: -122.4606, frequency: 1 },
-  { latitude: 37.7097, longitude: -122.4539, frequency: 4 },
-  { latitude: 37.7097, longitude: -122.4501, frequency: 4 },
-  { latitude: 37.7097, longitude: -122.448, frequency: 1 },
-  { latitude: 37.7097, longitude: -122.4416, frequency: 1 },
-  { latitude: 37.7097, longitude: -122.416, frequency: 2 },
-  { latitude: 37.7097, longitude: -122.4118, frequency: 2 },
-  { latitude: 37.7098, longitude: -122.4086, frequency: 5 },
-  { latitude: 37.7099, longitude: -122.4704, frequency: 2 },
-  { latitude: 37.7099, longitude: -122.4406, frequency: 1 },
-  { latitude: 37.7099, longitude: -122.4169, frequency: 2 },
-  { latitude: 37.7101, longitude: -122.4387, frequency: 4 },
-  { latitude: 37.7101, longitude: -122.421, frequency: 6 },
-  { latitude: 37.7101, longitude: -122.415, frequency: 2 },
-  { latitude: 37.7101, longitude: -122.4116, frequency: 2 },
-  { latitude: 37.7101, longitude: -122.4096, frequency: 1 },
-  { latitude: 37.7102, longitude: -122.4396, frequency: 1 },
-  { latitude: 37.7102, longitude: -122.435, frequency: 2 },
-  { latitude: 37.7102, longitude: -122.4202, frequency: 6 },
-  { latitude: 37.7103, longitude: -122.4419, frequency: 1 },
-  { latitude: 37.7103, longitude: -122.4217, frequency: 2 },
-  { latitude: 37.7104, longitude: -122.4484, frequency: 3 },
-  { latitude: 37.7104, longitude: -122.4132, frequency: 2 },
-  { latitude: 37.7104, longitude: -122.4104, frequency: 1 },
-  { latitude: 37.7104, longitude: -122.4042, frequency: 3 },
-  { latitude: 37.7104, longitude: -122.3967, frequency: 1 },
-  { latitude: 37.7105, longitude: -122.3986, frequency: 1 },
-  { latitude: 37.7106, longitude: -122.4693, frequency: 5 },
-  { latitude: 37.7106, longitude: -122.4501, frequency: 1 },
-  { latitude: 37.7106, longitude: -122.4475, frequency: 6 },
-  { latitude: 37.7106, longitude: -122.4384, frequency: 2 },
-  { latitude: 37.7106, longitude: -122.4139, frequency: 5 },
-  { latitude: 37.7106, longitude: -122.4113, frequency: 2 },
-  { latitude: 37.7107, longitude: -122.4704, frequency: 2 },
-  { latitude: 37.7107, longitude: -122.4662, frequency: 4 },
-  { latitude: 37.7107, longitude: -122.454, frequency: 1 },
-  { latitude: 37.7107, longitude: -122.4513, frequency: 1 },
-  { latitude: 37.7107, longitude: -122.4314, frequency: 3 },
-  { latitude: 37.7107, longitude: -122.4188, frequency: 1 },
-  { latitude: 37.7107, longitude: -122.4052, frequency: 2 },
-  { latitude: 37.7107, longitude: -122.3994, frequency: 1 },
-  { latitude: 37.7108, longitude: -122.4653, frequency: 4 },
-  { latitude: 37.7108, longitude: -122.4614, frequency: 2 },
-  { latitude: 37.7109, longitude: -122.4422, frequency: 4 },
-  { latitude: 37.7109, longitude: -122.4353, frequency: 1 },
-  { latitude: 37.7109, longitude: -122.4123, frequency: 4 },
-  { latitude: 37.7109, longitude: -122.4003, frequency: 1 },
-  { latitude: 37.711, longitude: -122.4684, frequency: 1 },
-  { latitude: 37.711, longitude: -122.4462, frequency: 4 },
-  { latitude: 37.711, longitude: -122.4129, frequency: 3 },
-  { latitude: 37.711, longitude: -122.3965, frequency: 1 },
-  { latitude: 37.7111, longitude: -122.4508, frequency: 4 },
-  { latitude: 37.7111, longitude: -122.4011, frequency: 1 },
-  { latitude: 37.7111, longitude: -122.3898, frequency: 2 },
-  { latitude: 37.7112, longitude: -122.4558, frequency: 1 },
-  { latitude: 37.7112, longitude: -122.4531, frequency: 2 },
-  { latitude: 37.7112, longitude: -122.4411, frequency: 3 },
-  { latitude: 37.7112, longitude: -122.4163, frequency: 6 },
-  { latitude: 37.7112, longitude: -122.4036, frequency: 5 },
-  { latitude: 37.7112, longitude: -122.3973, frequency: 2 },
-  { latitude: 37.7112, longitude: -122.3865, frequency: 3 },
-  { latitude: 37.7113, longitude: -122.4222, frequency: 7 },
-  { latitude: 37.7113, longitude: -122.3926, frequency: 2 },
-  { latitude: 37.7113, longitude: -122.389, frequency: 1 },
-  { latitude: 37.7114, longitude: -122.459, frequency: 2 },
-  { latitude: 37.7114, longitude: -122.456, frequency: 3 },
-  { latitude: 37.7114, longitude: -122.4464, frequency: 1 },
-  { latitude: 37.7114, longitude: -122.4342, frequency: 1 },
-  { latitude: 37.7114, longitude: -122.4079, frequency: 3 },
-  { latitude: 37.7114, longitude: -122.3982, frequency: 1 },
-  { latitude: 37.7116, longitude: -122.4733, frequency: 1 },
-  { latitude: 37.7116, longitude: -122.4525, frequency: 2 },
-  { latitude: 37.7116, longitude: -122.4461, frequency: 4 },
-  { latitude: 37.7116, longitude: -122.4396, frequency: 3 },
-  { latitude: 37.7116, longitude: -122.4048, frequency: 9 },
-  { latitude: 37.7117, longitude: -122.4515, frequency: 1 },
-  { latitude: 37.7117, longitude: -122.4151, frequency: 8 },
-  { latitude: 37.7117, longitude: -122.4088, frequency: 1 },
-  { latitude: 37.7118, longitude: -122.4391, frequency: 1 },
-  { latitude: 37.7118, longitude: -122.4033, frequency: 4 },
-  { latitude: 37.7118, longitude: -122.3999, frequency: 4 },
-  { latitude: 37.7119, longitude: -122.4433, frequency: 1 },
-  { latitude: 37.7119, longitude: -122.4188, frequency: 8 },
-  { latitude: 37.712, longitude: -122.4097, frequency: 6 },
-  { latitude: 37.712, longitude: -122.4008, frequency: 6 },
-  { latitude: 37.712, longitude: -122.394, frequency: 1 },
-  { latitude: 37.7121, longitude: -122.4426, frequency: 2 },
-  { latitude: 37.7121, longitude: -122.3951, frequency: 2 },
-  { latitude: 37.7122, longitude: -122.4704, frequency: 2 },
-  { latitude: 37.7122, longitude: -122.4468, frequency: 2 },
-  { latitude: 37.7122, longitude: -122.4106, frequency: 1 },
-  { latitude: 37.7122, longitude: -122.4025, frequency: 10 },
-  { latitude: 37.7123, longitude: -122.4626, frequency: 1 },
-  { latitude: 37.7123, longitude: -122.456, frequency: 1 },
-  { latitude: 37.7123, longitude: -122.4508, frequency: 4 },
-  { latitude: 37.7123, longitude: -122.4358, frequency: 1 },
-  { latitude: 37.7123, longitude: -122.4183, frequency: 7 },
-  { latitude: 37.7123, longitude: -122.4065, frequency: 12 },
-  { latitude: 37.7124, longitude: -122.4671, frequency: 2 },
-  { latitude: 37.7124, longitude: -122.4416, frequency: 1 },
-  { latitude: 37.7124, longitude: -122.4375, frequency: 5 },
-  { latitude: 37.7125, longitude: -122.4116, frequency: 2 },
-  { latitude: 37.7125, longitude: -122.4073, frequency: 1 },
-  { latitude: 37.7126, longitude: -122.4447, frequency: 8 },
-  { latitude: 37.7127, longitude: -122.4125, frequency: 2 },
-  { latitude: 37.7128, longitude: -122.4501, frequency: 3 },
-  { latitude: 37.7128, longitude: -122.4446, frequency: 3 },
-  { latitude: 37.7128, longitude: -122.4401, frequency: 1 },
-  { latitude: 37.7128, longitude: -122.435, frequency: 3 },
-  { latitude: 37.7128, longitude: -122.4319, frequency: 1 },
-  { latitude: 37.7128, longitude: -122.4083, frequency: 1 },
-  { latitude: 37.7129, longitude: -122.4727, frequency: 3 },
-  { latitude: 37.713, longitude: -122.4134, frequency: 1 },
-  { latitude: 37.713, longitude: -122.4021, frequency: 1 },
-  { latitude: 37.7131, longitude: -122.4494, frequency: 3 },
-  { latitude: 37.7131, longitude: -122.4337, frequency: 1 },
-  { latitude: 37.7132, longitude: -122.4626, frequency: 2 },
-  { latitude: 37.7132, longitude: -122.459, frequency: 1 },
-  { latitude: 37.7132, longitude: -122.4561, frequency: 8 },
-  { latitude: 37.7132, longitude: -122.4455, frequency: 2 },
-  { latitude: 37.7132, longitude: -122.4071, frequency: 1 },
-  { latitude: 37.7133, longitude: -122.3977, frequency: 1 },
-  { latitude: 37.7134, longitude: -122.444, frequency: 7 },
-  { latitude: 37.7134, longitude: -122.4363, frequency: 1 },
-  { latitude: 37.7135, longitude: -122.4345, frequency: 2 },
-  { latitude: 37.7135, longitude: -122.4153, frequency: 3 },
-  { latitude: 37.7136, longitude: -122.4449, frequency: 2 },
-  { latitude: 37.7137, longitude: -122.4984, frequency: 14 },
-  { latitude: 37.7137, longitude: -122.4731, frequency: 24 },
-  { latitude: 37.7137, longitude: -122.4421, frequency: 1 },
-  { latitude: 37.7137, longitude: -122.4369, frequency: 3 },
-  { latitude: 37.7138, longitude: -122.4693, frequency: 2 },
-  { latitude: 37.7138, longitude: -122.4354, frequency: 1 },
-  { latitude: 37.7138, longitude: -122.4092, frequency: 1 },
-  { latitude: 37.7139, longitude: -122.449, frequency: 1 },
-  { latitude: 37.7139, longitude: -122.4412, frequency: 2 },
-  { latitude: 37.714, longitude: -122.4626, frequency: 5 },
-  { latitude: 37.7141, longitude: -122.459, frequency: 3 },
-  { latitude: 37.7141, longitude: -122.4561, frequency: 2 },
-  { latitude: 37.7142, longitude: -122.4755, frequency: 3 },
-  { latitude: 37.7142, longitude: -122.4717, frequency: 1 },
-  { latitude: 37.7142, longitude: -122.4362, frequency: 2 },
-  { latitude: 37.7143, longitude: -122.4705, frequency: 2 },
-  { latitude: 37.7143, longitude: -122.4698, frequency: 1 },
-  { latitude: 37.7143, longitude: -122.4689, frequency: 2 },
-  { latitude: 37.7143, longitude: -122.468, frequency: 1 },
-  { latitude: 37.7143, longitude: -122.4653, frequency: 3 },
-  { latitude: 37.7143, longitude: -122.4644, frequency: 8 },
-  { latitude: 37.7143, longitude: -122.4494, frequency: 1 },
-  { latitude: 37.7143, longitude: -122.4468, frequency: 4 },
-  { latitude: 37.7143, longitude: -122.4383, frequency: 3 },
-  { latitude: 37.7143, longitude: -122.4139, frequency: 4 },
-  { latitude: 37.7143, longitude: -122.3986, frequency: 6 },
-  { latitude: 37.7144, longitude: -122.4113, frequency: 4 },
-  { latitude: 37.7144, longitude: -122.4035, frequency: 1 },
-  { latitude: 37.7146, longitude: -122.4449, frequency: 1 },
-  { latitude: 37.7146, longitude: -122.437, frequency: 1 },
-  { latitude: 37.7146, longitude: -122.4148, frequency: 3 },
-  { latitude: 37.7146, longitude: -122.4065, frequency: 1 },
-  { latitude: 37.7147, longitude: -122.4852, frequency: 1 },
-  { latitude: 37.7147, longitude: -122.4426, frequency: 2 },
-  { latitude: 37.7147, longitude: -122.4415, frequency: 4 },
-  { latitude: 37.7147, longitude: -122.4022, frequency: 2 },
-  { latitude: 37.7147, longitude: -122.4005, frequency: 1 },
-  { latitude: 37.7148, longitude: -122.4336, frequency: 1 },
-  { latitude: 37.7149, longitude: -122.4626, frequency: 4 },
-  { latitude: 37.7149, longitude: -122.4561, frequency: 1 },
-  { latitude: 37.7149, longitude: -122.4378, frequency: 1 },
-  { latitude: 37.715, longitude: -122.4525, frequency: 5 },
-  { latitude: 37.715, longitude: -122.4323, frequency: 8 },
-  { latitude: 37.715, longitude: -122.4136, frequency: 2 },
-  { latitude: 37.7151, longitude: -122.4456, frequency: 2 },
-  { latitude: 37.7151, longitude: -122.3825, frequency: 2 },
-  { latitude: 37.7152, longitude: -122.4803, frequency: 1 },
-  { latitude: 37.7152, longitude: -122.4707, frequency: 3 },
-  { latitude: 37.7152, longitude: -122.4404, frequency: 2 },
-  { latitude: 37.7152, longitude: -122.4086, frequency: 2 },
-  { latitude: 37.7152, longitude: -122.4062, frequency: 4 }
-];
+// Process the raw CSV data into CrimeDataPoints
+export function processCrimeData(csvText: string): CrimeDataPoint[] {
+  const parsedData = parseCSV(csvText);
+  
+  return parsedData.map(row => ({
+    latitude: parseFloat(row.latitude),
+    longitude: parseFloat(row.longitude),
+    frequency: parseInt(row.frequency, 10)
+  }));
+}
+
+// Store the CSV text as a constant
+export const crimeCsvData = `latitude,longitude,frequency
+37.708,-122.4623,2
+37.7082,-122.4523,2
+37.7083,-122.4543,2
+37.7083,-122.4201,12
+37.7085,-122.4617,1
+37.7085,-122.4209,1
+37.7086,-122.4448,2
+37.7086,-122.4013,8
+37.7087,-122.4704,3
+37.7087,-122.4693,1
+37.7087,-122.4423,5
+37.7087,-122.415,1
+37.7089,-122.426,1
+37.7089,-122.4223,3
+37.7089,-122.4051,27
+37.7089,-122.3944,6
+37.709,-122.4582,2
+37.709,-122.416,3
+37.7091,-122.4477,2
+37.7091,-122.406,2
+37.7092,-122.4643,1
+37.7092,-122.4558,3
+37.7092,-122.4532,8
+37.7092,-122.4229,5
+37.7092,-122.4062,1
+37.7093,-122.4427,5
+37.7093,-122.4261,1
+37.7094,-122.4509,1
+37.7094,-122.4467,4
+37.7095,-122.4577,3
+37.7095,-122.4177,3
+37.7095,-122.4129,3
+37.7096,-122.4679,2
+37.7096,-122.4347,1
+37.7097,-122.4606,1
+37.7097,-122.4539,4
+37.7097,-122.4501,4
+37.7097,-122.448,1
+37.7097,-122.4416,1
+37.7097,-122.416,2
+37.7097,-122.4118,2
+37.7098,-122.4086,5
+37.7099,-122.4704,2
+37.7099,-122.4406,1
+37.7099,-122.4169,2
+37.7101,-122.4387,4
+37.7101,-122.421,6
+37.7101,-122.415,2
+37.7101,-122.4116,2
+37.7101,-122.4096,1
+37.7102,-122.4396,1
+37.7102,-122.435,2
+37.7102,-122.4202,6
+37.7103,-122.4419,1
+37.7103,-122.4217,2
+37.7104,-122.4484,3
+37.7104,-122.4132,2
+37.7104,-122.4104,1
+37.7104,-122.4042,3
+37.7104,-122.3967,1
+37.7105,-122.3986,1
+37.7106,-122.4693,5
+37.7106,-122.4501,1
+37.7106,-122.4475,6
+37.7106,-122.4384,2
+37.7106,-122.4139,5
+37.7106,-122.4113,2
+37.7107,-122.4704,2
+37.7107,-122.4662,4
+37.7107,-122.454,1
+37.7107,-122.4513,1
+37.7107,-122.4314,3
+37.7107,-122.4188,1
+37.7107,-122.4052,2
+37.7107,-122.3994,1
+37.7108,-122.4653,4
+37.7108,-122.4614,2
+37.7109,-122.4422,4
+37.7109,-122.4353,1
+37.7109,-122.4123,4
+37.7109,-122.4003,1
+37.711,-122.4684,1
+37.711,-122.4462,4
+37.711,-122.4129,3
+37.711,-122.3965,1
+37.7111,-122.4508,4
+37.7111,-122.4011,1
+37.7111,-122.3898,2
+37.7112,-122.4558,1
+37.7112,-122.4531,2
+37.7112,-122.4411,3
+37.7112,-122.4163,6
+37.7112,-122.4036,5
+37.7112,-122.3973,2
+37.7112,-122.3865,3
+37.7113,-122.4222,7
+37.7113,-122.3926,2
+37.7113,-122.389,1
+37.7114,-122.459,2
+37.7114,-122.456,3
+37.7114,-122.4464,1
+37.7114,-122.4342,1
+37.7114,-122.4079,3
+37.7114,-122.3982,1
+37.7116,-122.4733,1
+37.7116,-122.4525,2
+37.7116,-122.4461,4
+37.7116,-122.4396,3
+37.7116,-122.4048,9
+37.7117,-122.4515,1
+37.7117,-122.4151,8
+37.7117,-122.4088,1
+37.7118,-122.4391,1
+37.7118,-122.4033,4
+37.7118,-122.3999,4
+37.7119,-122.4433,1
+37.7119,-122.4188,8
+37.712,-122.4097,6
+37.712,-122.4008,6
+37.712,-122.394,1
+37.7121,-122.4426,2
+37.7121,-122.3951,2
+37.7122,-122.4704,2
+37.7122,-122.4468,2
+37.7122,-122.4106,1
+37.7122,-122.4025,10
+37.7123,-122.4626,1
+37.7123,-122.456,1
+37.7123,-122.4508,4
+37.7123,-122.4358,1
+37.7123,-122.4183,7
+37.7123,-122.4065,12
+37.7124,-122.4671,2
+37.7124,-122.4416,1
+37.7124,-122.4375,5
+37.7125,-122.4116,2
+37.7125,-122.4073,1
+37.7126,-122.4447,8
+37.7127,-122.4125,2
+37.7128,-122.4501,3
+37.7128,-122.4446,3
+37.7128,-122.4401,1
+37.7128,-122.435,3
+37.7128,-122.4319,1
+37.7128,-122.4083,1
+37.7129,-122.4727,3
+37.713,-122.4134,1
+37.713,-122.4021,1
+37.7131,-122.4494,3
+37.7131,-122.4337,1
+37.7132,-122.4626,2
+37.7132,-122.459,1
+37.7132,-122.4561,8
+37.7132,-122.4455,2
+37.7132,-122.4071,1
+37.7133,-122.3977,1
+37.7134,-122.444,7
+37.7134,-122.4363,1
+37.7135,-122.4345,2
+37.7135,-122.4153,3
+37.7136,-122.4449,2
+37.7137,-122.4984,14
+37.7137,-122.4731,24
+37.7137,-122.4421,1
+37.7137,-122.4369,3
+37.7138,-122.4693,2
+37.7138,-122.4354,1
+37.7138,-122.4092,1
+37.7139,-122.449,1
+37.7139,-122.4412,2
+37.714,-122.4626,5
+37.7141,-122.459,3
+37.7141,-122.4561,2
+37.7142,-122.4755,3
+37.7142,-122.4717,1
+37.7142,-122.4362,2
+37.7143,-122.4705,2
+37.7143,-122.4698,1
+37.7143,-122.4689,2
+37.7143,-122.468,1
+37.7143,-122.4653,3
+37.7143,-122.4644,8
+37.7143,-122.4494,1
+37.7143,-122.4468,4
+37.7143,-122.4383,3
+37.7143,-122.4139,4
+37.7143,-122.3986,6
+37.7144,-122.4113,4
+37.7144,-122.4035,1
+37.7146,-122.4449,1
+37.7146,-122.437,1
+37.7146,-122.4148,3
+37.7146,-122.4065,1
+37.7147,-122.4852,1
+37.7147,-122.4426,2
+37.7147,-122.4415,4
+37.7147,-122.4022,2
+37.7147,-122.4005,1
+37.7148,-122.4336,1
+37.7149,-122.4626,4
+37.7149,-122.4561,1
+37.7149,-122.4378,1
+37.715,-122.4525,5
+37.715,-122.4323,8
+37.715,-122.4136,2
+37.7151,-122.4456,2
+37.7151,-122.3825,2
+37.7152,-122.4803,1
+37.7152,-122.4707,3
+37.7152,-122.4404,2
+37.7152,-122.4086,2
+37.7152,-122.4062,4
+37.7153,-122.4481,3
+37.7153,-122.4458,5
+37.7154,-122.4418,6
+37.7154,-122.4331,1
+37.7154,-122.3996,7
+37.7155,-122.4833,1
+37.7155,-122.4532,2
+37.7155,-122.4438,1
+37.7156,-122.4626,3
+37.7156,-122.4439,1
+37.7157,-122.4475,2
+37.7157,-122.4464,1
+37.7157,-122.4394,2
+37.7158,-122.4591,4
+37.7158,-122.4416,7
+37.7158,-122.4339,1
+37.7158,-122.4083,3
+37.7159,-122.4784,1
+37.7159,-122.4744,3
+37.716,-122.4775,3
+37.716,-122.4403,20
+37.716,-122.437,5
+37.7161,-122.4716,3
+37.7161,-122.4707,1
+37.7161,-122.4698,1
+37.7161,-122.468,3
+37.7161,-122.4671,1
+37.7161,-122.4662,1
+37.7161,-122.4635,1
+37.7161,-122.4537,3
+37.7161,-122.4021,12
+37.7161,-122.389,6
+37.7161,-122.3844,16
+37.7162,-122.4845,9
+37.7162,-122.4833,2
+37.7162,-122.4816,4
+37.7162,-122.4504,4
+37.7162,-122.4469,1
+37.7162,-122.4347,6
+37.7162,-122.3997,1
+37.7162,-122.39,11
+37.7163,-122.4099,1
+37.7163,-122.4011,1
+37.7165,-122.4473,2
+37.7165,-122.441,18
+37.7166,-122.4626,4
+37.7166,-122.4602,4
+37.7166,-122.4591,2
+37.7166,-122.4561,12
+37.7166,-122.4512,1
+37.7166,-122.4452,1
+37.7166,-122.4388,3
+37.7166,-122.4355,2
+37.7166,-122.4312,1
+37.7166,-122.4056,1
+37.7167,-122.4268,3
+37.7167,-122.3998,2
+37.7168,-122.4759,2
+37.7169,-122.48,2
+37.7169,-122.3907,16
+37.717,-122.4519,4
+37.717,-122.4434,2
+37.717,-122.4396,1
+37.717,-122.432,3
+37.717,-122.4276,3
+37.717,-122.3961,1
+37.7171,-122.4738,15
+37.7171,-122.4458,6
+37.7171,-122.4247,2
+37.7172,-122.4726,5
+37.7172,-122.4404,5
+37.7172,-122.4077,3
+37.7172,-122.3863,4
+37.7173,-122.4848,4
+37.7173,-122.4429,2
+37.7173,-122.4416,3
+37.7173,-122.4371,1
+37.7173,-122.4053,2
+37.7173,-122.4026,1
+37.7174,-122.4753,2
+37.7174,-122.4626,3
+37.7174,-122.4284,1
+37.7175,-122.4815,18
+37.7175,-122.4781,1
+37.7175,-122.4744,10
+37.7175,-122.4591,4
+37.7175,-122.4477,1
+37.7175,-122.4037,1
+37.7175,-122.4016,1
+37.7175,-122.3916,1
+37.7175,-122.3902,1
+37.7175,-122.3868,13
+37.7176,-122.4832,1
+37.7177,-122.4401,3
+37.7177,-122.4379,3
+37.7177,-122.4336,1
+37.7177,-122.3971,1
+37.7178,-122.4534,1
+37.7178,-122.4423,4
+37.7178,-122.4292,1
+37.7178,-122.4073,1
+37.7178,-122.4006,2
+37.7178,-122.3857,10
+37.7179,-122.4787,5
+37.7179,-122.4724,2
+37.7179,-122.4689,2
+37.7179,-122.468,2
+37.7179,-122.4671,2
+37.7179,-122.4662,2
+37.7179,-122.4653,3
+37.7179,-122.4635,2
+37.718,-122.4772,1
+37.718,-122.4447,2
+37.718,-122.4053,2
+37.7181,-122.4388,1
+37.7181,-122.4344,1
+37.7181,-122.43,4
+37.7181,-122.3983,1
+37.7182,-122.4754,3
+37.7182,-122.4592,2
+37.7182,-122.4582,1
+37.7182,-122.4571,3
+37.7182,-122.4541,1
+37.7182,-122.3881,6
+37.7183,-122.4741,4
+37.7183,-122.4463,4
+37.7183,-122.4409,1
+37.7183,-122.4258,1
+37.7183,-122.4062,1
+37.7183,-122.4036,1
+37.7184,-122.4504,2
+37.7184,-122.3867,1
+37.7185,-122.4831,3
+37.7185,-122.4786,3
+37.7185,-122.4442,1
+37.7185,-122.4395,3
+37.7185,-122.4352,2
+37.7185,-122.4308,1
+37.7185,-122.4031,4
+37.7185,-122.3935,4
+37.7186,-122.4516,7
+37.7186,-122.4413,2
+37.7186,-122.3921,3
+37.7187,-122.4781,2
+37.7187,-122.4492,4
+37.7187,-122.4021,1
+37.7187,-122.3906,7
+37.7188,-122.4459,2
+37.7188,-122.4117,8
+37.7188,-122.3975,8
+37.7189,-122.4478,1
+37.7189,-122.436,1
+37.7189,-122.4316,1
+37.7189,-122.4272,4
+37.7189,-122.396,8
+37.719,-122.5002,12
+37.719,-122.45,7
+37.7191,-122.4814,22
+37.7191,-122.4398,1
+37.7191,-122.411,3
+37.7191,-122.393,1
+37.7192,-122.4004,2
+37.7193,-122.4368,1
+37.7193,-122.4324,4
+37.7193,-122.428,4
+37.7193,-122.4258,4
+37.7193,-122.41,2
+37.7193,-122.4048,2
+37.7193,-122.39,5
+37.7194,-122.4508,1
+37.7195,-122.4764,1
+37.7195,-122.4476,4
+37.7195,-122.397,2
+37.7196,-122.4798,4
+37.7196,-122.4716,1
+37.7196,-122.4426,2
+37.7196,-122.3954,4
+37.7197,-122.4689,1
+37.7197,-122.4681,3
+37.7197,-122.4663,1
+37.7197,-122.4645,4
+37.7197,-122.4332,1
+37.7197,-122.4288,3
+37.7197,-122.408,1
+37.7197,-122.4058,1
+37.7197,-122.4056,1
+37.7197,-122.3924,3
+37.7197,-122.3841,17
+37.7198,-122.4847,1
+37.7198,-122.4846,2
+37.7198,-122.4831,7
+37.7198,-122.4752,3
+37.7199,-122.4636,2
+37.7199,-122.4026,2
+37.7199,-122.3895,3
+37.72,-122.4623,2
+37.72,-122.4612,2
+37.72,-122.4602,3
+37.72,-122.4592,1
+37.72,-122.4572,1
+37.72,-122.4561,2
+37.72,-122.4551,1
+37.72,-122.4541,2
+37.72,-122.4531,3
+37.72,-122.4523,1
+37.72,-122.4383,14
+37.7201,-122.479,1
+37.7201,-122.478,1
+37.7201,-122.4771,3
+37.7

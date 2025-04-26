@@ -4,7 +4,7 @@ import MapComponent from '@/components/MapComponent';
 import MapControls from '@/components/MapControls';
 import { crimeData, crimeDataToGeoJSON } from '@/utils/crimeDataToGeoJSON';
 
-// Define initial map options
+// Define initial map options - centered on San Francisco
 const initialMapOptions = {
   style: 'mapbox://styles/mapbox/dark-v11',
   center: [-122.4194, 37.7749] as [number, number], // Center on San Francisco
@@ -12,8 +12,8 @@ const initialMapOptions = {
 };
 
 const MapPage: React.FC = () => {
-  const [showCrimeHeatmap, setShowCrimeHeatmap] = useState(false);
-  const [showCrimeCluster, setShowCrimeCluster] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showCluster, setShowCluster] = useState(false);
   const [showDottedLine, setShowDottedLine] = useState(false);
   const [showCustomIcons, setShowCustomIcons] = useState(false);
   const [showDataDriven, setShowDataDriven] = useState(false);
@@ -24,24 +24,23 @@ const MapPage: React.FC = () => {
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
       <MapControls
-        showCrimeHeatmap={showCrimeHeatmap}
-        setShowCrimeHeatmap={setShowCrimeHeatmap}
-        showCrimeCluster={showCrimeCluster}
-        setShowCrimeCluster={setShowCrimeCluster}
+        showHeatmap={showHeatmap}
+        setShowHeatmap={setShowHeatmap}
+        showCluster={showCluster}
+        setShowCluster={setShowCluster}
         showDottedLine={showDottedLine}
         setShowDottedLine={setShowDottedLine}
         showCustomIcons={showCustomIcons}
         setShowCustomIcons={setShowCustomIcons}
         showDataDriven={showDataDriven}
         setShowDataDriven={setShowDataDriven}
-        isLoading={false}
       />
 
       <MapComponent
         mapId="main-map"
         options={initialMapOptions}
-        showCrimeHeatmap={showCrimeHeatmap}
-        showCrimeCluster={showCrimeCluster}
+        showCrimeHeatmap={showHeatmap}
+        showCrimeCluster={showCluster}
         showDottedLine={showDottedLine}
         showCustomIcons={showCustomIcons}
         showDataDriven={showDataDriven}
@@ -53,3 +52,4 @@ const MapPage: React.FC = () => {
 };
 
 export default MapPage;
+
