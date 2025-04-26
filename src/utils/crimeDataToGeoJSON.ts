@@ -1,45 +1,13 @@
 
-import { parseCSV } from './csvParser';
+import { parseCSV } from '../utils/csvParser';
 
-export interface CrimeDataPoint {
+type CrimeDataPoint = {
   latitude: number;
   longitude: number;
   frequency: number;
-}
+};
 
-export function crimeDataToGeoJSON(data: CrimeDataPoint[]): GeoJSON.FeatureCollection {
-  const features: GeoJSON.Feature[] = data.map(point => ({
-    type: 'Feature',
-    geometry: {
-      type: 'Point',
-      coordinates: [point.longitude, point.latitude]
-    },
-    properties: {
-      frequency: point.frequency
-    }
-  }));
-
-  return {
-    type: 'FeatureCollection',
-    features
-  };
-}
-
-// Process the raw CSV data into CrimeDataPoints
-export function processCrimeData(csvText: string): CrimeDataPoint[] {
-  const parsedData = parseCSV(csvText);
-  
-  return parsedData.map(row => ({
-    latitude: parseFloat(row.latitude),
-    longitude: parseFloat(row.longitude),
-    frequency: parseInt(row.frequency, 10)
-  }));
-}
-
-// Parse the crime data directly
-export const crimeData = processCrimeData(crimeCsvData);
-
-// Store the CSV text as a constant
+// First, declare the CSV data constant
 export const crimeCsvData = `latitude,longitude,frequency
 37.708,-122.4623,2
 37.7082,-122.4523,2
@@ -74,96 +42,62 @@ export const crimeCsvData = `latitude,longitude,frequency
 37.7095,-122.4177,3
 37.7095,-122.4129,3
 37.7096,-122.4679,2
-37.7096,-122.4347,1
-37.7097,-122.4606,1
-37.7097,-122.4539,4
-37.7097,-122.4501,4
-37.7097,-122.448,1
-37.7097,-122.4416,1
-37.7097,-122.416,2
-37.7097,-122.4118,2
-37.7098,-122.4086,5
-37.7099,-122.4704,2
-37.7099,-122.4406,1
-37.7099,-122.4169,2
-37.7101,-122.4387,4
-37.7101,-122.421,6
-37.7101,-122.415,2
-37.7101,-122.4116,2
-37.7101,-122.4096,1
-37.7102,-122.4396,1
-37.7102,-122.435,2
-37.7102,-122.4202,6
-37.7103,-122.4419,1
-37.7103,-122.4217,2
-37.7104,-122.4484,3
-37.7104,-122.4132,2
-37.7104,-122.4104,1
-37.7104,-122.4042,3
-37.7104,-122.3967,1
-37.7105,-122.3986,1
-37.7106,-122.4693,5
-37.7106,-122.4501,1
-37.7106,-122.4475,6
-37.7106,-122.4384,2
-37.7106,-122.4139,5
-37.7106,-122.4113,2
-37.7107,-122.4704,2
-37.7107,-122.4662,4
-37.7107,-122.454,1
-37.7107,-122.4513,1
-37.7107,-122.4314,3
-37.7107,-122.4188,1
-37.7107,-122.4052,2
-37.7107,-122.3994,1
-37.7108,-122.4653,4
-37.7108,-122.4614,2
-37.7109,-122.4422,4
-37.7109,-122.4353,1
-37.7109,-122.4123,4
-37.7109,-122.4003,1
-37.711,-122.4684,1
-37.711,-122.4462,4
-37.711,-122.4129,3
-37.711,-122.3965,1
-37.7111,-122.4508,4
-37.7111,-122.4011,1
-37.7111,-122.3898,2
-37.7112,-122.4558,1
-37.7112,-122.4531,2
-37.7112,-122.4411,3
-37.7112,-122.4163,6
-37.7112,-122.4036,5
-37.7112,-122.3973,2
-37.7112,-122.3865,3
-37.7113,-122.4222,7
-37.7113,-122.3926,2
-37.7113,-122.389,1
-37.7114,-122.459,2
-37.7114,-122.456,3
-37.7114,-122.4464,1
-37.7114,-122.4342,1
-37.7114,-122.4079,3
-37.7114,-122.3982,1
-37.7116,-122.4733,1
-37.7116,-122.4525,2
-37.7116,-122.4461,4
-37.7116,-122.4396,3
-37.7116,-122.4048,9
-37.7117,-122.4515,1
-37.7117,-122.4151,8
-37.7117,-122.4088,1
-37.7118,-122.4391,1
-37.7118,-122.4033,4
-37.7118,-122.3999,4
-37.7119,-122.4433,1
-37.7119,-122.4188,8
-37.712,-122.4097,6
-37.712,-122.4008,6
-37.712,-122.394,1
-37.7121,-122.4426,2
-37.7121,-122.3951,2
-37.7122,-122.4704,2
-37.7122,-122.4468,2
-37.7122,-122.4106,1
-37.7122,-122.4025,10`;
+37.7096,-122.4347,1`;
+
+/**
+ * Parses CSV text and converts it to GeoJSON FeatureCollection for crime data.
+ * @param csvText The CSV text string.
+ * @returns A GeoJSON FeatureCollection object.
+ */
+export const crimeDataToGeoJSON = (csvText: string = crimeCsvData): GeoJSON.FeatureCollection => {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2) {
+    console.error("CSV data must have at least a header and one data row.");
+    return { type: 'FeatureCollection', features: [] };
+  }
+
+  const headers = lines[0].split(',').map(h => h.trim());
+  const latIndex = headers.indexOf('latitude');
+  const lonIndex = headers.indexOf('longitude');
+  const freqIndex = headers.indexOf('frequency');
+
+  if (latIndex === -1 || lonIndex === -1 || freqIndex === -1) {
+    console.error("CSV headers must include 'latitude', 'longitude', and 'frequency'.");
+    return { type: 'FeatureCollection', features: [] };
+  }
+
+  const features: GeoJSON.Feature[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',');
+    if (values.length >= headers.length) {
+      const latitude = parseFloat(values[latIndex]?.trim());
+      const longitude = parseFloat(values[lonIndex]?.trim());
+      const frequency = parseInt(values[freqIndex]?.trim(), 10);
+
+      if (!isNaN(latitude) && !isNaN(longitude) && !isNaN(frequency)) {
+        features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude]
+          },
+          properties: {
+            frequency: frequency
+          }
+        });
+      } else {
+        console.warn(`Skipping invalid data row ${i + 1}: ${lines[i]}`);
+      }
+    } else {
+      console.warn(`Skipping malformed CSV row ${i + 1}: ${lines[i]}`);
+    }
+  }
+
+  return {
+    type: 'FeatureCollection',
+    features
+  };
+};
+
+// Process the raw CSV data into initial crime data points
+export const crimeData = crimeDataToGeoJSON();
