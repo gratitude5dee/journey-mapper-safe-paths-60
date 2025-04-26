@@ -24,16 +24,17 @@ const MapPage: React.FC = () => {
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
       <MapControls
-        showHeatmap={showHeatmap}
-        setShowHeatmap={setShowHeatmap}
-        showCluster={showCluster}
-        setShowCluster={setShowCluster}
+        showCrimeHeatmap={showHeatmap}
+        setShowCrimeHeatmap={setShowHeatmap}
+        showCrimeCluster={showCluster}
+        setShowCrimeCluster={setShowCluster}
         showDottedLine={showDottedLine}
         setShowDottedLine={setShowDottedLine}
         showCustomIcons={showCustomIcons}
         setShowCustomIcons={setShowCustomIcons}
         showDataDriven={showDataDriven}
         setShowDataDriven={setShowDataDriven}
+        isLoading={false}
       />
 
       <MapComponent
@@ -52,4 +53,3 @@ const MapPage: React.FC = () => {
 };
 
 export default MapPage;
-
