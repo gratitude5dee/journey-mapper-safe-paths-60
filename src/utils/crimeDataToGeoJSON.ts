@@ -23,7 +23,7 @@ export const crimeDataToGeoJSON = (crimeData: CrimeDataPoint[]): GeoJSON.Feature
   };
 };
 
-// Static crime data
+// Sample crime data points for San Francisco
 export const crimeData: CrimeDataPoint[] = [
   { latitude: 37.708, longitude: -122.4623, frequency: 2 },
   { latitude: 37.7082, longitude: -122.4523, frequency: 2 },

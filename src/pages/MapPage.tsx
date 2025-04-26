@@ -4,11 +4,11 @@ import MapComponent from '@/components/MapComponent';
 import MapControls from '@/components/MapControls';
 import { crimeData, crimeDataToGeoJSON } from '@/utils/crimeDataToGeoJSON';
 
-// Define initial map options with correct center type
+// Define initial map options
 const initialMapOptions = {
   style: 'mapbox://styles/mapbox/dark-v11',
-  center: [-98.5795, 39.8283] as [number, number], // Explicitly typed as a tuple
-  initialZoom: 4,
+  center: [-122.4194, 37.7749] as [number, number], // Center on San Francisco
+  initialZoom: 12,
 };
 
 const MapPage: React.FC = () => {
