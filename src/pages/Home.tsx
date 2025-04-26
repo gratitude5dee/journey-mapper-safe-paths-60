@@ -5,16 +5,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, MessageSquare } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
 
 const Home = () => {
   const [mapInitialized, setMapInitialized] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // Initialize Mapbox with the token from Supabase
+  // Initialize Mapbox with the token
   useEffect(() => {
     try {
-      // Use the token you've stored in Supabase
-      window.mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JhdGl0dWQzIiwiYSI6ImNtOXlycGJiNjFpOGEybXEwNGRvaGo0NmwifQ.o9pk9WZT4UjsBz768aC1Zg';
+      // Set the Mapbox access token
+      mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JhdGl0dWQzIiwiYSI6ImNtOXlycGJiNjFpOGEybXEwNGRvaGo0NmwifQ.o9pk9WZT4UjsBz768aC1Zg';
       setMapInitialized(true);
     } catch (error) {
       console.error("Error initializing Mapbox:", error);
