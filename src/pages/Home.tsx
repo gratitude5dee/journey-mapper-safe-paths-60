@@ -38,7 +38,7 @@ const Home = () => {
                 onChange={(e) => setMapboxToken(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Get your token at mapbox.com
+                Get your token at <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">mapbox.com</a>
               </p>
             </div>
           ) : (
@@ -60,4 +60,3 @@ const Home = () => {
 };
 
 export default Home;
-
