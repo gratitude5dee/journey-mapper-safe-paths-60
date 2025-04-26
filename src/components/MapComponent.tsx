@@ -1,36 +1,22 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useSafeMap } from '@/hooks/useSafeMap';
-import type { SafeMapOptions } from '@/hooks/useSafeMap';
-import mapboxgl, { Map, Marker } from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl';
 
 interface MapComponentProps {
   mapId: string;
-  options: Omit<SafeMapOptions, 'containerId'>;
-  // Feature flags
+  options: {
+    style: string;
+    center: [number, number];
+    initialZoom: number;
+  };
   showCrimeHeatmap: boolean;
   showCrimeCluster: boolean;
   showDottedLine: boolean;
   showCustomIcons: boolean;
   showDataDriven: boolean;
-  // Data and controls
   crimeData: GeoJSON.FeatureCollection | null;
   ethnicitySourceUrl: string;
 }
-
-// Define source and layer IDs consistently
-const CRIME_SOURCE_ID = 'crimes';
-const CRIME_HEATMAP_LAYER_ID = 'crimes-heat';
-const CRIME_POINT_LAYER_ID = 'crimes-point';
-const CRIME_CLUSTER_SOURCE_ID = 'crime-clusters';
-const CRIME_CLUSTER_CIRCLES_LAYER_ID = 'crime-cluster-circles';
-const CRIME_CLUSTER_COUNT_LAYER_ID = 'crime-cluster-count';
-const CRIME_UNCLUSTERED_POINT_LAYER_ID = 'crime-unclustered-point';
-const ETHNICITY_SOURCE_ID = 'ethnicity';
-const DATADRIVEN_LAYER_ID = 'population-circles';
-const DOTTED_SOURCE_ID = 'route-data';
-const DOTTED_LAYER_ID = 'route-line';
-const DOTTED_IMAGE_ID = 'pattern-dot';
 
 const MapComponent: React.FC<MapComponentProps> = ({
   mapId,
@@ -43,68 +29,64 @@ const MapComponent: React.FC<MapComponentProps> = ({
   crimeData,
   ethnicitySourceUrl
 }) => {
-  const mapInstance = useSafeMap({ containerId: mapId, ...options });
-  const iconMarkersRef = useRef<Marker[]>([]);
-  
-  // Helper function to add or update a source
-  const addOrUpdateSource = (map: Map, id: string, sourceOptions: mapboxgl.AnySourceData) => {
-    const existingSource = map.getSource(id);
-    if (existingSource && sourceOptions.type === 'geojson' && 'setData' in existingSource) {
-      (existingSource as mapboxgl.GeoJSONSource).setData(sourceOptions.data as GeoJSON.FeatureCollection);
-    } else if (!existingSource) {
-      map.addSource(id, sourceOptions);
-    }
-  };
+  const mapInstance = useSafeMap({
+    containerId: mapId,
+    style: options.style,
+    center: options.center,
+    initialZoom: options.initialZoom
+  });
 
-  // Helper function to remove layer and source
-  const removeLayerAndSource = (map: Map, layerId: string | string[], sourceId: string) => {
-    const layers = Array.isArray(layerId) ? layerId : [layerId];
-    layers.forEach(id => {
-      if (map.getLayer(id)) {
-        map.removeLayer(id);
-      }
-    });
-    if (map.getSource(sourceId)) {
-      map.removeSource(sourceId);
-    }
-  };
-
-  // Crime data handling
+  // Effect for adding crime data source
   useEffect(() => {
     if (!mapInstance || !crimeData) return;
 
-    addOrUpdateSource(mapInstance, CRIME_SOURCE_ID, {
-      type: 'geojson',
-      data: crimeData,
-      cluster: showCrimeCluster,
-      clusterMaxZoom: 14,
-      clusterRadius: 50
-    });
+    // Add or update crime data source
+    const sourceId = 'crime-data';
+    const source = mapInstance.getSource(sourceId);
+    
+    if (source && 'setData' in source) {
+      (source as mapboxgl.GeoJSONSource).setData(crimeData);
+    } else {
+      if (!mapInstance.getSource(sourceId)) {
+        mapInstance.addSource(sourceId, {
+          type: 'geojson',
+          data: crimeData,
+          cluster: showCrimeCluster,
+          clusterMaxZoom: 14,
+          clusterRadius: 50
+        });
+      }
+    }
 
     return () => {
-      // Source cleanup will be handled by feature-specific effects
+      // We don't remove the source here to avoid flickering if other layers need it
     };
   }, [mapInstance, crimeData, showCrimeCluster]);
 
-  // Heatmap Layer
+  // Effect for crime heatmap
   useEffect(() => {
     if (!mapInstance || !crimeData) return;
-
-    const addHeatmapLayer = () => {
-      if (!mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) {
+    
+    const layerId = 'crime-heatmap';
+    
+    if (showCrimeHeatmap) {
+      if (!mapInstance.getLayer(layerId)) {
         mapInstance.addLayer({
-          id: CRIME_HEATMAP_LAYER_ID,
+          id: layerId,
           type: 'heatmap',
-          source: CRIME_SOURCE_ID,
+          source: 'crime-data',
           paint: {
-            // Adjust weight based on crime frequency
-            'heatmap-weight': ['interpolate', ['linear'], ['get', 'frequency'], 
+            // Weight by crime frequency
+            'heatmap-weight': [
+              'interpolate', ['linear'], ['get', 'frequency'],
               0, 0,
-              10, 0.3,
-              50, 0.6,
-              100, 1
+              50, 1
             ],
-            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
+            'heatmap-intensity': [
+              'interpolate', ['linear'], ['zoom'],
+              0, 1,
+              9, 3
+            ],
             'heatmap-color': [
               'interpolate', ['linear'], ['heatmap-density'],
               0, 'rgba(33,102,172,0)',
@@ -114,102 +96,79 @@ const MapComponent: React.FC<MapComponentProps> = ({
               0.8, 'rgb(239,138,98)',
               1, 'rgb(178,24,43)'
             ],
-            'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
+            'heatmap-radius': [
+              'interpolate', ['linear'], ['zoom'],
+              0, 2,
+              9, 20
+            ],
             'heatmap-opacity': 0.8
           }
         });
       }
-
-      if (!mapInstance.getLayer(CRIME_POINT_LAYER_ID)) {
-        mapInstance.addLayer({
-          id: CRIME_POINT_LAYER_ID,
-          type: 'circle',
-          source: CRIME_SOURCE_ID,
-          paint: {
-            // Adjust radius based on crime frequency
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 
-              7, ['interpolate', ['linear'], ['get', 'frequency'], 
-                1, 1, 
-                50, 4, 
-                100, 8
-              ], 
-              16, ['interpolate', ['linear'], ['get', 'frequency'], 
-                1, 5, 
-                50, 20, 
-                100, 40
-              ]
-            ],
-            // Adjust color based on crime frequency
-            'circle-color': ['interpolate', ['linear'], ['get', 'frequency'], 
-              1, 'rgba(33,102,172,0)', 
-              10, 'rgb(103,169,207)', 
-              30, 'rgb(209,229,240)', 
-              50, 'rgb(253,219,199)', 
-              70, 'rgb(239,138,98)', 
-              100, 'rgb(178,24,43)'
-            ],
-            'circle-stroke-color': 'white',
-            'circle-stroke-width': 1,
-            'circle-opacity': 0.8
-          }
-        });
-      }
-    };
-
-    if (showCrimeHeatmap && mapInstance.isStyleLoaded()) {
-      addHeatmapLayer();
-    } else if (showCrimeHeatmap) {
-      mapInstance.once('style.load', addHeatmapLayer);
     } else {
-      if (mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) mapInstance.removeLayer(CRIME_HEATMAP_LAYER_ID);
-      if (mapInstance.getLayer(CRIME_POINT_LAYER_ID)) mapInstance.removeLayer(CRIME_POINT_LAYER_ID);
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
     }
 
     return () => {
-      if (mapInstance && mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) {
-        mapInstance.removeLayer(CRIME_HEATMAP_LAYER_ID);
-      }
-      if (mapInstance && mapInstance.getLayer(CRIME_POINT_LAYER_ID)) {
-        mapInstance.removeLayer(CRIME_POINT_LAYER_ID);
+      if (mapInstance && mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
       }
     };
   }, [mapInstance, showCrimeHeatmap, crimeData]);
 
-  // Cluster Layer
+  // Effect for crime clusters
   useEffect(() => {
     if (!mapInstance || !crimeData) return;
+    
+    const circlesLayerId = 'crime-clusters';
+    const countLayerId = 'crime-cluster-count';
+    const unclusteredLayerId = 'crime-unclustered-point';
 
-    const addClusterLayers = () => {
-      if (!mapInstance.getLayer(CRIME_CLUSTER_CIRCLES_LAYER_ID)) {
+    if (showCrimeCluster) {
+      // Update source clustering options
+      const source = mapInstance.getSource('crime-data');
+      if (source && typeof (source as any).setClusterOptions === 'function') {
+        (source as any).setClusterOptions({
+          cluster: true,
+          clusterMaxZoom: 14,
+          clusterRadius: 50
+        });
+      }
+      
+      // Add cluster circles layer
+      if (!mapInstance.getLayer(circlesLayerId)) {
         mapInstance.addLayer({
-          id: CRIME_CLUSTER_CIRCLES_LAYER_ID,
+          id: circlesLayerId,
           type: 'circle',
-          source: CRIME_SOURCE_ID,
+          source: 'crime-data',
           filter: ['has', 'point_count'],
           paint: {
             'circle-color': [
               'step',
               ['get', 'point_count'],
               '#51bbd6',
-              30, '#f1f075',
-              75, '#f28cb1'
+              100, '#f1f075',
+              750, '#f28cb1'
             ],
             'circle-radius': [
               'step',
               ['get', 'point_count'],
               20,
-              30, 30,
-              75, 40
+              100, 30,
+              750, 40
             ]
           }
         });
       }
-
-      if (!mapInstance.getLayer(CRIME_CLUSTER_COUNT_LAYER_ID)) {
+      
+      // Add cluster count layer
+      if (!mapInstance.getLayer(countLayerId)) {
         mapInstance.addLayer({
-          id: CRIME_CLUSTER_COUNT_LAYER_ID,
+          id: countLayerId,
           type: 'symbol',
-          source: CRIME_SOURCE_ID,
+          source: 'crime-data',
           filter: ['has', 'point_count'],
           layout: {
             'text-field': '{point_count_abbreviated}',
@@ -218,72 +177,83 @@ const MapComponent: React.FC<MapComponentProps> = ({
           }
         });
       }
-
-      if (!mapInstance.getLayer(CRIME_UNCLUSTERED_POINT_LAYER_ID)) {
+      
+      // Add unclustered point layer
+      if (!mapInstance.getLayer(unclusteredLayerId)) {
         mapInstance.addLayer({
-          id: CRIME_UNCLUSTERED_POINT_LAYER_ID,
+          id: unclusteredLayerId,
           type: 'circle',
-          source: CRIME_SOURCE_ID,
+          source: 'crime-data',
           filter: ['!', ['has', 'point_count']],
           paint: {
-            // Adjust color based on crime frequency
-            'circle-color': ['interpolate', ['linear'], ['get', 'frequency'], 
-              0, '#11b4da', 
-              50, '#f7a35c', 
-              100, '#8b0000'
+            'circle-color': [
+              'interpolate', ['linear'], ['get', 'frequency'],
+              0, '#11b4da',
+              10, '#f7a35c',
+              50, '#8b0000'
             ],
-            // Adjust radius based on crime frequency
-            'circle-radius': ['interpolate', ['linear'], ['get', 'frequency'], 
-              0, 4, 
-              50, 8,
-              100, 16
+            'circle-radius': [
+              'interpolate', ['linear'], ['get', 'frequency'],
+              0, 4,
+              50, 16
             ],
             'circle-stroke-width': 1,
             'circle-stroke-color': '#fff'
           }
         });
       }
-    };
-
-    if (showCrimeCluster && mapInstance.isStyleLoaded()) {
-      addClusterLayers();
-    } else if (showCrimeCluster) {
-      mapInstance.once('style.load', addClusterLayers);
     } else {
-      if (mapInstance.getLayer(CRIME_CLUSTER_CIRCLES_LAYER_ID)) mapInstance.removeLayer(CRIME_CLUSTER_CIRCLES_LAYER_ID);
-      if (mapInstance.getLayer(CRIME_CLUSTER_COUNT_LAYER_ID)) mapInstance.removeLayer(CRIME_CLUSTER_COUNT_LAYER_ID);
-      if (mapInstance.getLayer(CRIME_UNCLUSTERED_POINT_LAYER_ID)) mapInstance.removeLayer(CRIME_UNCLUSTERED_POINT_LAYER_ID);
+      // Remove cluster layers
+      if (mapInstance.getLayer(circlesLayerId)) mapInstance.removeLayer(circlesLayerId);
+      if (mapInstance.getLayer(countLayerId)) mapInstance.removeLayer(countLayerId);
+      if (mapInstance.getLayer(unclusteredLayerId)) mapInstance.removeLayer(unclusteredLayerId);
+      
+      // Update source to disable clustering
+      const source = mapInstance.getSource('crime-data');
+      if (source && typeof (source as any).setClusterOptions === 'function') {
+        (source as any).setClusterOptions({
+          cluster: false
+        });
+      }
     }
 
     return () => {
       if (mapInstance) {
-        if (mapInstance.getLayer(CRIME_CLUSTER_CIRCLES_LAYER_ID)) mapInstance.removeLayer(CRIME_CLUSTER_CIRCLES_LAYER_ID);
-        if (mapInstance.getLayer(CRIME_CLUSTER_COUNT_LAYER_ID)) mapInstance.removeLayer(CRIME_CLUSTER_COUNT_LAYER_ID);
-        if (mapInstance.getLayer(CRIME_UNCLUSTERED_POINT_LAYER_ID)) mapInstance.removeLayer(CRIME_UNCLUSTERED_POINT_LAYER_ID);
+        if (mapInstance.getLayer(circlesLayerId)) mapInstance.removeLayer(circlesLayerId);
+        if (mapInstance.getLayer(countLayerId)) mapInstance.removeLayer(countLayerId);
+        if (mapInstance.getLayer(unclusteredLayerId)) mapInstance.removeLayer(unclusteredLayerId);
       }
     };
   }, [mapInstance, showCrimeCluster, crimeData]);
 
-  // Data-Driven Styling
+  // Effect for data-driven styling (ethnicity circles)
   useEffect(() => {
     if (!mapInstance) return;
 
-    const addDataDrivenLayer = () => {
-      if (!mapInstance.getSource(ETHNICITY_SOURCE_ID)) {
-        mapInstance.addSource(ETHNICITY_SOURCE_ID, {
+    const sourceId = 'ethnicity-data';
+    const layerId = 'ethnicity-circles';
+
+    if (showDataDriven) {
+      // Add source if it doesn't exist
+      if (!mapInstance.getSource(sourceId)) {
+        mapInstance.addSource(sourceId, {
           type: 'vector',
           url: ethnicitySourceUrl
         });
       }
 
-      if (!mapInstance.getLayer(DATADRIVEN_LAYER_ID)) {
+      // Add layer if it doesn't exist
+      if (!mapInstance.getLayer(layerId)) {
         mapInstance.addLayer({
-          id: DATADRIVEN_LAYER_ID,
+          id: layerId,
           type: 'circle',
-          source: ETHNICITY_SOURCE_ID,
+          source: sourceId,
           'source-layer': 'sf2010',
           paint: {
-            'circle-radius': { base: 1.75, stops: [[12, 2], [22, 180]] },
+            'circle-radius': {
+              base: 1.75,
+              stops: [[12, 2], [22, 180]]
+            },
             'circle-color': [
               'match',
               ['get', 'ethnicity'],
@@ -296,172 +266,203 @@ const MapComponent: React.FC<MapComponentProps> = ({
           }
         });
       }
-    };
-
-    if (showDataDriven && mapInstance.isStyleLoaded()) {
-      addDataDrivenLayer();
-    } else if (showDataDriven) {
-      mapInstance.once('style.load', addDataDrivenLayer);
     } else {
-      removeLayerAndSource(mapInstance, DATADRIVEN_LAYER_ID, ETHNICITY_SOURCE_ID);
+      // Remove layer if it exists
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
+      
+      // Remove source if it exists and no other layers are using it
+      if (mapInstance.getSource(sourceId)) {
+        const layers = mapInstance.getStyle().layers;
+        const isSourceUsed = layers.some(layer => 
+          layer.source === sourceId && layer.id !== layerId
+        );
+        
+        if (!isSourceUsed) {
+          mapInstance.removeSource(sourceId);
+        }
+      }
     }
 
     return () => {
-      if (mapInstance) {
-        removeLayerAndSource(mapInstance, DATADRIVEN_LAYER_ID, ETHNICITY_SOURCE_ID);
+      if (mapInstance && mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
       }
     };
   }, [mapInstance, showDataDriven, ethnicitySourceUrl]);
 
-  // Dotted Line Effect
+  // Effect for dotted line route
   useEffect(() => {
     if (!mapInstance) return;
-    let isImageLoaded = false;
 
-    const addDottedLineLayer = () => {
-      if (!isImageLoaded) return;
-
-      if (!mapInstance.getSource(DOTTED_SOURCE_ID)) {
-        mapInstance.addSource(DOTTED_SOURCE_ID, {
-          type: 'geojson',
-          lineMetrics: true,
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [-122.42, 37.78],
-                [-122.41, 37.77],
-                [-122.40, 37.76],
-                [-122.39, 37.75],
-                [-122.38, 37.74]
-              ]
-            }
-          }
-        });
-      }
-
-      if (!mapInstance.getLayer(DOTTED_LAYER_ID)) {
-        mapInstance.addLayer({
-          id: DOTTED_LAYER_ID,
-          type: 'line',
-          source: DOTTED_SOURCE_ID,
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-pattern': DOTTED_IMAGE_ID,
-            'line-width': 8
-          }
-        });
-      }
-    };
+    const sourceId = 'dotted-line-source';
+    const layerId = 'dotted-line-layer';
+    const imageId = 'dotted-pattern';
 
     if (showDottedLine) {
-      if (mapInstance.hasImage(DOTTED_IMAGE_ID)) {
-        isImageLoaded = true;
-        addDottedLineLayer();
-      } else {
+      // Load the dotted pattern image if it doesn't exist
+      if (!mapInstance.hasImage(imageId)) {
         mapInstance.loadImage(
-          'https://docs.mapbox.com/mapbox-gl-js/assets/pattern-dot.png',
+          'https://docs.mapbox.com/mapbox-gl-js/assets/dash.png',
           (error, image) => {
             if (error) {
               console.error('Error loading dotted pattern image:', error);
               return;
             }
-            if (image && !mapInstance.hasImage(DOTTED_IMAGE_ID)) {
-              mapInstance.addImage(DOTTED_IMAGE_ID, image);
-              isImageLoaded = true;
-              addDottedLineLayer();
+            
+            if (image && !mapInstance.hasImage(imageId)) {
+              mapInstance.addImage(imageId, image);
+              
+              // Add source and layer after image is loaded
+              if (!mapInstance.getSource(sourceId)) {
+                mapInstance.addSource(sourceId, {
+                  type: 'geojson',
+                  data: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                      type: 'LineString',
+                      coordinates: [
+                        [-122.414, 37.776],
+                        [-122.407, 37.784],
+                        [-122.400, 37.778]
+                      ]
+                    }
+                  }
+                });
+              }
+              
+              if (!mapInstance.getLayer(layerId)) {
+                mapInstance.addLayer({
+                  id: layerId,
+                  type: 'line',
+                  source: sourceId,
+                  layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                  },
+                  paint: {
+                    'line-color': '#4882c5',
+                    'line-width': 3,
+                    'line-dasharray': [0.2, 2]
+                  }
+                });
+              }
             }
           }
         );
+      } else {
+        // Image already loaded, just add source and layer
+        if (!mapInstance.getSource(sourceId)) {
+          mapInstance.addSource(sourceId, {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: [
+                  [-122.414, 37.776],
+                  [-122.407, 37.784],
+                  [-122.400, 37.778]
+                ]
+              }
+            }
+          });
+        }
+        
+        if (!mapInstance.getLayer(layerId)) {
+          mapInstance.addLayer({
+            id: layerId,
+            type: 'line',
+            source: sourceId,
+            layout: {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            paint: {
+              'line-color': '#4882c5',
+              'line-width': 3,
+              'line-dasharray': [0.2, 2]
+            }
+          });
+        }
       }
     } else {
-      removeLayerAndSource(mapInstance, DOTTED_LAYER_ID, DOTTED_SOURCE_ID);
+      // Remove layer and source if they exist
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
+      
+      if (mapInstance.getSource(sourceId)) {
+        mapInstance.removeSource(sourceId);
+      }
     }
 
     return () => {
       if (mapInstance) {
-        removeLayerAndSource(mapInstance, DOTTED_LAYER_ID, DOTTED_SOURCE_ID);
+        if (mapInstance.getLayer(layerId)) {
+          mapInstance.removeLayer(layerId);
+        }
+        
+        if (mapInstance.getSource(sourceId)) {
+          mapInstance.removeSource(sourceId);
+        }
       }
     };
   }, [mapInstance, showDottedLine]);
 
-  // Custom Icons Effect
+  // Effect for custom icons
   useEffect(() => {
     if (!mapInstance) return;
 
-    const iconGeoJson = {
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          properties: { message: 'Safety Concern', iconSize: [40, 40] },
-          geometry: { type: 'Point', coordinates: [-122.414, 37.776] }
-        },
-        {
-          type: 'Feature',
-          properties: { message: 'Police Station', iconSize: [40, 40] },
-          geometry: { type: 'Point', coordinates: [-122.407, 37.784] }
-        },
-        {
-          type: 'Feature',
-          properties: { message: 'Safe Zone', iconSize: [40, 40] },
-          geometry: { type: 'Point', coordinates: [-122.400, 37.778] }
-        }
-      ]
-    };
-
-    const addIconMarkers = () => {
-      iconMarkersRef.current.forEach(marker => marker.remove());
-      iconMarkersRef.current = [];
-
-      for (const feature of iconGeoJson.features) {
+    const markers: mapboxgl.Marker[] = [];
+    
+    if (showCustomIcons) {
+      // Define custom icon locations
+      const iconLocations = [
+        { lngLat: [-122.414, 37.776], title: 'Police Station', color: '#1e88e5' },
+        { lngLat: [-122.407, 37.784], title: 'Hospital', color: '#d81b60' },
+        { lngLat: [-122.400, 37.778], title: 'Safe Zone', color: '#43a047' }
+      ];
+      
+      // Create and add markers
+      iconLocations.forEach(location => {
+        // Create custom element for marker
         const el = document.createElement('div');
-        const { iconSize, message } = feature.properties;
-        const [width, height] = iconSize;
-        
         el.className = 'custom-marker';
-        el.style.backgroundImage = `url(https://placekitten.com/${width}/${height})`;
-        el.style.width = `${width}px`;
-        el.style.height = `${height}px`;
-        el.style.backgroundSize = 'cover';
+        el.style.backgroundColor = location.color;
+        el.style.width = '24px';
+        el.style.height = '24px';
         el.style.borderRadius = '50%';
         el.style.border = '2px solid white';
         el.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
-
+        
+        // Add click handler for popup
         el.addEventListener('click', () => {
           new mapboxgl.Popup({ offset: 25 })
-            .setLngLat(feature.geometry.coordinates as [number, number])
-            .setHTML(`<p>${message}</p>`)
+            .setLngLat(location.lngLat)
+            .setHTML(`<h3>${location.title}</h3>`)
             .addTo(mapInstance);
         });
-
+        
+        // Create and add marker
         const marker = new mapboxgl.Marker(el)
-          .setLngLat(feature.geometry.coordinates as [number, number])
+          .setLngLat(location.lngLat)
           .addTo(mapInstance);
           
-        iconMarkersRef.current.push(marker);
-      }
-    };
-
-    const removeIconMarkers = () => {
-      iconMarkersRef.current.forEach(marker => marker.remove());
-      iconMarkersRef.current = [];
-    };
-
-    if (showCustomIcons) {
-      addIconMarkers();
-    } else {
-      removeIconMarkers();
+        markers.push(marker);
+      });
     }
-
+    
+    // Cleanup function to remove markers
     return () => {
-      removeIconMarkers();
+      markers.forEach(marker => marker.remove());
     };
   }, [mapInstance, showCustomIcons]);
 
-  return <div id={mapId} className="absolute inset-0" />;
+  return <div id={mapId} className="h-full w-full" />;
 };
 
 export default MapComponent;

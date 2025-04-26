@@ -5,29 +5,26 @@ import MapControls from '@/components/MapControls';
 import type { MapFeatureState } from '@/hooks/useMapFeatures';
 
 interface MapContainerProps extends MapFeatureState {
-  setShowHeatmap: (show: boolean) => void;
-  setShowCluster: (show: boolean) => void;
+  setShowCrimeHeatmap: (show: boolean) => void;
+  setShowCrimeCluster: (show: boolean) => void;
   setShowDottedLine: (show: boolean) => void;
   setShowCustomIcons: (show: boolean) => void;
   setShowDataDriven: (show: boolean) => void;
-  setCurrentMonth: (month: number) => void;
   className?: string;
   children?: React.ReactNode;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
-  showHeatmap,
-  setShowHeatmap,
-  showCluster,
-  setShowCluster,
+  showCrimeHeatmap,
+  setShowCrimeHeatmap,
+  showCrimeCluster,
+  setShowCrimeCluster,
   showDottedLine,
   setShowDottedLine,
   showCustomIcons,
   setShowCustomIcons,
   showDataDriven,
   setShowDataDriven,
-  currentMonth,
-  setCurrentMonth,
   isLoading = false,
   className = "h-screen",
   children
@@ -44,18 +41,16 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       <div id="map" className="absolute inset-0" />
       
       <MapControls
-        showHeatmap={showHeatmap}
-        setShowHeatmap={setShowHeatmap}
-        showCluster={showCluster}
-        setShowCluster={setShowCluster}
+        showCrimeHeatmap={showCrimeHeatmap}
+        setShowCrimeHeatmap={setShowCrimeHeatmap}
+        showCrimeCluster={showCrimeCluster}
+        setShowCrimeCluster={setShowCrimeCluster}
         showDottedLine={showDottedLine}
         setShowDottedLine={setShowDottedLine}
         showCustomIcons={showCustomIcons}
         setShowCustomIcons={setShowCustomIcons}
         showDataDriven={showDataDriven}
         setShowDataDriven={setShowDataDriven}
-        currentMonth={currentMonth}
-        setCurrentMonth={setCurrentMonth}
         isLoading={isLoading}
       />
 

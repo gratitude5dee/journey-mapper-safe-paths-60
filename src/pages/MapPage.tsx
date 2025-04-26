@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import MapComponent from '@/components/MapComponent';
 import MapControls from '@/components/MapControls';
-import { SafeMapOptions } from '@safe-routes/map';
 import { parseCSV } from '@/utils/csvParser';
 
 // Define initial map options
@@ -11,6 +10,14 @@ const initialMapOptions: Omit<SafeMapOptions, 'containerId'> = {
   center: [-98.5795, 39.8283], // Center of US
   initialZoom: 4,
 };
+
+// Define the SafeMapOptions type here since we can't import it
+interface SafeMapOptions {
+  containerId: string;
+  style: string;
+  center: [number, number];
+  initialZoom: number;
+}
 
 const MapPage: React.FC = () => {
   // State for layer visibility and controls
