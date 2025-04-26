@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import MapComponent from '@/components/MapComponent';
 import MapControls from '@/components/MapControls';
-import { crimeData, crimeDataToGeoJSON } from '@/utils/crimeDataToGeoJSON';
+import { crimeData, crimeCsvData, crimeDataToGeoJSON } from '@/utils/crimeDataToGeoJSON';
 
 // Define initial map options - centered on San Francisco
 const initialMapOptions = {
@@ -18,8 +18,8 @@ const MapPage: React.FC = () => {
   const [showCustomIcons, setShowCustomIcons] = useState(false);
   const [showDataDriven, setShowDataDriven] = useState(false);
   
-  // Convert static crime data to GeoJSON
-  const crimeGeoJSON = crimeDataToGeoJSON(crimeData);
+  // Use the pre-processed crime data directly instead of trying to process it again
+  const crimeGeoJSON = crimeData;
 
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">

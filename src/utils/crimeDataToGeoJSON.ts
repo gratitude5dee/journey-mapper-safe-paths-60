@@ -1,12 +1,4 @@
 
-import { parseCSV } from '../utils/csvParser';
-
-type CrimeDataPoint = {
-  latitude: number;
-  longitude: number;
-  frequency: number;
-};
-
 // First, declare the CSV data constant
 export const crimeCsvData = `latitude,longitude,frequency
 37.708,-122.4623,2
