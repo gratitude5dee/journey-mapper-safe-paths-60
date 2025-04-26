@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useSafeMap } from '@/hooks/useSafeMap';
 import mapboxgl from 'mapbox-gl';
@@ -15,9 +14,16 @@ interface MapComponentProps {
   showDottedLine: boolean;
   showCustomIcons: boolean;
   showDataDriven: boolean;
-  crimeData: GeoJSON.FeatureCollection | null;
+  crimeData: GeoJSON.FeatureCollection;
   ethnicitySourceUrl: string;
 }
+
+// Define source and layer IDs
+const CRIME_SOURCE_ID = 'crime-data';
+const CRIME_HEATMAP_LAYER_ID = 'crime-heatmap';
+const CRIME_CLUSTER_LAYER_ID = 'crime-clusters';
+const CRIME_COUNT_LAYER_ID = 'crime-count';
+const CRIME_POINT_LAYER_ID = 'crime-points';
 
 const MapComponent: React.FC<MapComponentProps> = ({
   mapId,
@@ -30,54 +36,42 @@ const MapComponent: React.FC<MapComponentProps> = ({
   crimeData,
   ethnicitySourceUrl
 }) => {
-  const mapInstance = useSafeMap({
-    containerId: mapId,
-    style: options.style,
-    center: options.center,
-    initialZoom: options.initialZoom
-  });
+  const mapInstance = useSafeMap({ containerId: mapId, ...options });
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // Effect for adding crime data source
+  // Initialize or update crime data source
   useEffect(() => {
     if (!mapInstance || !crimeData) return;
 
-    // Add or update crime data source
-    const sourceId = 'crime-data';
-    const source = mapInstance.getSource(sourceId);
-    
+    const source = mapInstance.getSource(CRIME_SOURCE_ID);
     if (source && 'setData' in source) {
       (source as mapboxgl.GeoJSONSource).setData(crimeData);
-    } else {
-      if (!mapInstance.getSource(sourceId)) {
-        mapInstance.addSource(sourceId, {
-          type: 'geojson',
-          data: crimeData,
-          cluster: showCrimeCluster,
-          clusterMaxZoom: 14,
-          clusterRadius: 50
-        });
-      }
+    } else if (!source) {
+      mapInstance.addSource(CRIME_SOURCE_ID, {
+        type: 'geojson',
+        data: crimeData,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50
+      });
     }
 
     return () => {
-      // We don't remove the source here to avoid flickering if other layers need it
+      // Cleanup will be handled by individual layer effects
     };
-  }, [mapInstance, crimeData, showCrimeCluster]);
+  }, [mapInstance, crimeData]);
 
-  // Effect for crime heatmap
+  // Crime heatmap layer
   useEffect(() => {
-    if (!mapInstance || !crimeData) return;
-    
-    const layerId = 'crime-heatmap';
-    
+    if (!mapInstance) return;
+
     if (showCrimeHeatmap) {
-      if (!mapInstance.getLayer(layerId)) {
+      if (!mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) {
         mapInstance.addLayer({
-          id: layerId,
+          id: CRIME_HEATMAP_LAYER_ID,
           type: 'heatmap',
-          source: 'crime-data',
+          source: CRIME_SOURCE_ID,
           paint: {
-            // Weight by crime frequency
             'heatmap-weight': [
               'interpolate', ['linear'], ['get', 'frequency'],
               0, 0,
@@ -97,79 +91,55 @@ const MapComponent: React.FC<MapComponentProps> = ({
               0.8, 'rgb(239,138,98)',
               1, 'rgb(178,24,43)'
             ],
-            'heatmap-radius': [
-              'interpolate', ['linear'], ['zoom'],
-              0, 2,
-              9, 20
-            ],
+            'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
             'heatmap-opacity': 0.8
           }
         });
       }
-    } else {
-      if (mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
-      }
+    } else if (mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) {
+      mapInstance.removeLayer(CRIME_HEATMAP_LAYER_ID);
     }
 
     return () => {
-      if (mapInstance && mapInstance.getLayer(layerId)) {
-        mapInstance.removeLayer(layerId);
+      if (mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) {
+        mapInstance.removeLayer(CRIME_HEATMAP_LAYER_ID);
       }
     };
-  }, [mapInstance, showCrimeHeatmap, crimeData]);
+  }, [mapInstance, showCrimeHeatmap]);
 
-  // Effect for crime clusters
+  // Crime clusters layer
   useEffect(() => {
-    if (!mapInstance || !crimeData) return;
-    
-    const circlesLayerId = 'crime-clusters';
-    const countLayerId = 'crime-cluster-count';
-    const unclusteredLayerId = 'crime-unclustered-point';
+    if (!mapInstance) return;
 
     if (showCrimeCluster) {
-      // Update source clustering options
-      const source = mapInstance.getSource('crime-data');
-      if (source && typeof (source as any).setClusterOptions === 'function') {
-        (source as any).setClusterOptions({
-          cluster: true,
-          clusterMaxZoom: 14,
-          clusterRadius: 50
-        });
-      }
-      
-      // Add cluster circles layer
-      if (!mapInstance.getLayer(circlesLayerId)) {
+      // Cluster circles
+      if (!mapInstance.getLayer(CRIME_CLUSTER_LAYER_ID)) {
         mapInstance.addLayer({
-          id: circlesLayerId,
+          id: CRIME_CLUSTER_LAYER_ID,
           type: 'circle',
-          source: 'crime-data',
+          source: CRIME_SOURCE_ID,
           filter: ['has', 'point_count'],
           paint: {
             'circle-color': [
-              'step',
-              ['get', 'point_count'],
-              '#51bbd6',
-              100, '#f1f075',
-              750, '#f28cb1'
+              'step', ['get', 'point_count'],
+              '#51bbd6', 100,
+              '#f1f075', 750,
+              '#f28cb1'
             ],
             'circle-radius': [
-              'step',
-              ['get', 'point_count'],
-              20,
-              100, 30,
-              750, 40
+              'step', ['get', 'point_count'],
+              20, 100, 30, 750, 40
             ]
           }
         });
       }
-      
-      // Add cluster count layer
-      if (!mapInstance.getLayer(countLayerId)) {
+
+      // Cluster count
+      if (!mapInstance.getLayer(CRIME_COUNT_LAYER_ID)) {
         mapInstance.addLayer({
-          id: countLayerId,
+          id: CRIME_COUNT_LAYER_ID,
           type: 'symbol',
-          source: 'crime-data',
+          source: CRIME_SOURCE_ID,
           filter: ['has', 'point_count'],
           layout: {
             'text-field': '{point_count_abbreviated}',
@@ -178,25 +148,25 @@ const MapComponent: React.FC<MapComponentProps> = ({
           }
         });
       }
-      
-      // Add unclustered point layer
-      if (!mapInstance.getLayer(unclusteredLayerId)) {
+
+      // Individual points
+      if (!mapInstance.getLayer(CRIME_POINT_LAYER_ID)) {
         mapInstance.addLayer({
-          id: unclusteredLayerId,
+          id: CRIME_POINT_LAYER_ID,
           type: 'circle',
-          source: 'crime-data',
+          source: CRIME_SOURCE_ID,
           filter: ['!', ['has', 'point_count']],
           paint: {
             'circle-color': [
               'interpolate', ['linear'], ['get', 'frequency'],
               0, '#11b4da',
-              10, '#f7a35c',
+              25, '#f7a35c',
               50, '#8b0000'
             ],
             'circle-radius': [
               'interpolate', ['linear'], ['get', 'frequency'],
-              0, 4,
-              50, 16
+              0, 5,
+              50, 20
             ],
             'circle-stroke-width': 1,
             'circle-stroke-color': '#fff'
@@ -204,28 +174,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
         });
       }
     } else {
-      // Remove cluster layers
-      if (mapInstance.getLayer(circlesLayerId)) mapInstance.removeLayer(circlesLayerId);
-      if (mapInstance.getLayer(countLayerId)) mapInstance.removeLayer(countLayerId);
-      if (mapInstance.getLayer(unclusteredLayerId)) mapInstance.removeLayer(unclusteredLayerId);
-      
-      // Update source to disable clustering
-      const source = mapInstance.getSource('crime-data');
-      if (source && typeof (source as any).setClusterOptions === 'function') {
-        (source as any).setClusterOptions({
-          cluster: false
-        });
-      }
+      [CRIME_CLUSTER_LAYER_ID, CRIME_COUNT_LAYER_ID, CRIME_POINT_LAYER_ID].forEach(layerId => {
+        if (mapInstance.getLayer(layerId)) {
+          mapInstance.removeLayer(layerId);
+        }
+      });
     }
 
     return () => {
-      if (mapInstance) {
-        if (mapInstance.getLayer(circlesLayerId)) mapInstance.removeLayer(circlesLayerId);
-        if (mapInstance.getLayer(countLayerId)) mapInstance.removeLayer(countLayerId);
-        if (mapInstance.getLayer(unclusteredLayerId)) mapInstance.removeLayer(unclusteredLayerId);
-      }
+      [CRIME_CLUSTER_LAYER_ID, CRIME_COUNT_LAYER_ID, CRIME_POINT_LAYER_ID].forEach(layerId => {
+        if (mapInstance && mapInstance.getLayer(layerId)) {
+          mapInstance.removeLayer(layerId);
+        }
+      });
     };
-  }, [mapInstance, showCrimeCluster, crimeData]);
+  }, [mapInstance, showCrimeCluster]);
 
   // Effect for data-driven styling (ethnicity circles)
   useEffect(() => {
