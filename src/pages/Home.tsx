@@ -1,93 +1,57 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSafeMap } from '@/hooks/useSafeMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { MapPin, MessageSquare } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const Home = () => {
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [tokenSubmitted, setTokenSubmitted] = useState(false);
+  const [mapInitialized, setMapInitialized] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
-  // Initialize map only after token is submitted
-  const mapInstance = tokenSubmitted ? useSafeMap({
+  // Initialize Mapbox with the token from Supabase
+  useEffect(() => {
+    try {
+      // Use the token you've stored in Supabase
+      window.mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JhdGl0dWQzIiwiYSI6ImNtOXlycGJiNjFpOGEybXEwNGRvaGo0NmwifQ.o9pk9WZT4UjsBz768aC1Zg';
+      setMapInitialized(true);
+    } catch (error) {
+      console.error("Error initializing Mapbox:", error);
+      setMapError("Could not initialize map. Please check your browser console for more information.");
+    }
+  }, []);
+
+  // Initialize map only after token is set
+  const mapInstance = mapInitialized ? useSafeMap({
     containerId: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
     center: [-122.42, 37.77],
     initialZoom: 13,
   }) : undefined;
 
-  const handleSubmitToken = () => {
-    if (!mapboxToken.trim()) {
-      toast({
-        title: "Token required",
-        description: "Please enter your Mapbox token",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    try {
-      window.mapboxgl.accessToken = mapboxToken.trim();
-      setTokenSubmitted(true);
-      toast({
-        title: "Success",
-        description: "Map token set successfully",
-      });
-    } catch (error) {
-      console.error("Error setting mapbox token:", error);
-      toast({
-        title: "Error",
-        description: "Could not initialize map with provided token",
-        variant: "destructive"
-      });
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      // Clean up map instance on component unmount
-      if (mapInstance) {
-        mapInstance.remove();
-      }
-    };
-  }, [mapInstance]);
-
   return (
     <div className="relative h-screen w-full">
       <div id="map" className="absolute inset-0" />
       
+      {mapError && (
+        <div className="absolute inset-x-0 top-4 flex justify-center">
+          <div className="bg-destructive text-destructive-foreground px-4 py-2 rounded shadow-lg">
+            {mapError}
+          </div>
+        </div>
+      )}
+      
       <Card className="fixed bottom-0 left-0 right-0 rounded-t-xl border-t shadow-lg md:bottom-8 md:left-1/2 md:right-auto md:w-96 md:-translate-x-1/2 md:rounded-xl">
         <CardContent className="grid gap-4 p-6">
-          {!tokenSubmitted ? (
-            <div className="space-y-2">
-              <Input 
-                placeholder="Enter Mapbox Public Token" 
-                value={mapboxToken}
-                onChange={(e) => setMapboxToken(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Get your token at <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">mapbox.com</a>
-              </p>
-              <Button className="w-full" onClick={handleSubmitToken}>
-                Set Token
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Button size="lg" className="w-full">
-                <MapPin />
-                Choose safer route
-              </Button>
-              <Button variant="outline" size="lg" className="w-full">
-                <MessageSquare />
-                Send feedback
-              </Button>
-            </>
-          )}
+          <Button size="lg" className="w-full">
+            <MapPin />
+            Choose safer route
+          </Button>
+          <Button variant="outline" size="lg" className="w-full">
+            <MessageSquare />
+            Send feedback
+          </Button>
         </CardContent>
       </Card>
     </div>
@@ -95,4 +59,3 @@ const Home = () => {
 };
 
 export default Home;
-
