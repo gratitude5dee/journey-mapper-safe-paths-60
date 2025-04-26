@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useRef } from 'react';
 import { useSafeMap } from '@/hooks/useSafeMap';
 import mapboxgl from 'mapbox-gl';
 
@@ -420,8 +421,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
     const markers: mapboxgl.Marker[] = [];
     
     if (showCustomIcons) {
-      // Define custom icon locations
-      const iconLocations = [
+      // Define custom icon locations with proper type annotation
+      const iconLocations: { lngLat: [number, number]; title: string; color: string }[] = [
         { lngLat: [-122.414, 37.776], title: 'Police Station', color: '#1e88e5' },
         { lngLat: [-122.407, 37.784], title: 'Hospital', color: '#d81b60' },
         { lngLat: [-122.400, 37.778], title: 'Safe Zone', color: '#43a047' }
