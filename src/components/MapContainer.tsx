@@ -32,8 +32,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const mapInstance = useSafeMap({
     containerId: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
-    center: [-122.42, 37.77],
-    initialZoom: 13,
+    center: [-122.4194, 37.7749],
+    initialZoom: 12,
   });
 
   return (
