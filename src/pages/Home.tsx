@@ -1,28 +1,60 @@
 
 import React, { useState, useEffect } from 'react';
-import { useSafeMap } from '@safe-routes/map';
+import { useSafeMap } from '@/hooks/useSafeMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MapPin, MessageSquare } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const Home = () => {
   const [mapboxToken, setMapboxToken] = useState('');
   const [tokenSubmitted, setTokenSubmitted] = useState(false);
 
-  const mapInstance = useSafeMap({
+  // Initialize map only after token is submitted
+  const mapInstance = tokenSubmitted ? useSafeMap({
     containerId: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
     center: [-122.42, 37.77],
     initialZoom: 13,
-  });
+  }) : undefined;
+
+  const handleSubmitToken = () => {
+    if (!mapboxToken.trim()) {
+      toast({
+        title: "Token required",
+        description: "Please enter your Mapbox token",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      window.mapboxgl.accessToken = mapboxToken.trim();
+      setTokenSubmitted(true);
+      toast({
+        title: "Success",
+        description: "Map token set successfully",
+      });
+    } catch (error) {
+      console.error("Error setting mapbox token:", error);
+      toast({
+        title: "Error",
+        description: "Could not initialize map with provided token",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
-    if (mapboxToken && window.mapboxgl) {
-      window.mapboxgl.accessToken = mapboxToken;
-      setTokenSubmitted(true);
-    }
-  }, [mapboxToken]);
+    return () => {
+      // Clean up map instance on component unmount
+      if (mapInstance) {
+        mapInstance.remove();
+      }
+    };
+  }, [mapInstance]);
 
   return (
     <div className="relative h-screen w-full">
@@ -40,6 +72,9 @@ const Home = () => {
               <p className="text-xs text-muted-foreground">
                 Get your token at <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">mapbox.com</a>
               </p>
+              <Button className="w-full" onClick={handleSubmitToken}>
+                Set Token
+              </Button>
             </div>
           ) : (
             <>
