@@ -1,9 +1,11 @@
 
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 export function Navbar() {
+  const activeClassName = "text-primary font-semibold";
+  
   return (
-    <nav className="bg-white border-b border-border">
+    <nav className="bg-white border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -12,16 +14,17 @@ export function Navbar() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/map" className="text-foreground hover:text-primary transition-colors">
+            <NavLink
+              to="/map"
+              className={({ isActive }) =>
+                `text-foreground hover:text-primary transition-colors ${isActive ? activeClassName : ""}`
+              }
+            >
               Map
-            </Link>
-            <Link to="/routes" className="text-foreground hover:text-primary transition-colors">
-              Routes
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>
     </nav>
   );
 }
-
