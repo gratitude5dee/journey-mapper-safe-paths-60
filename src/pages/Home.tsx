@@ -3,6 +3,7 @@ import { useSafeMap } from '@safe-routes/map';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, MessageSquare } from 'lucide-react';
+import { useEffect } from 'react';
 
 const Home = () => {
   const mapInstance = useSafeMap({
@@ -11,6 +12,13 @@ const Home = () => {
     center: [-122.42, 37.77],
     initialZoom: 13,
   });
+
+  useEffect(() => {
+    // Set Mapbox access token - you need to replace this with your own token
+    if (window.mapboxgl) {
+      window.mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+    }
+  }, []);
 
   return (
     <div className="relative h-screen w-full">
