@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import MapComponent from '@/components/MapComponent';
 import MapControls from '@/components/MapControls';
-import { SafeMapOptions } from '@/types/mapbox';
+import { crimeData, crimeDataToGeoJSON } from '@/utils/crimeDataToGeoJSON';
 
 // Define initial map options with correct center type
-const initialMapOptions: Omit<SafeMapOptions, 'containerId'> = {
+const initialMapOptions = {
   style: 'mapbox://styles/mapbox/dark-v11',
   center: [-98.5795, 39.8283] as [number, number], // Explicitly typed as a tuple
   initialZoom: 4,
