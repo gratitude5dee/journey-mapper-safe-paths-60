@@ -1,11 +1,15 @@
 
+import React, { useState, useEffect } from 'react';
 import { useSafeMap } from '@safe-routes/map';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { MapPin, MessageSquare } from 'lucide-react';
-import { useEffect } from 'react';
 
 const Home = () => {
+  const [mapboxToken, setMapboxToken] = useState('');
+  const [tokenSubmitted, setTokenSubmitted] = useState(false);
+
   const mapInstance = useSafeMap({
     containerId: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
@@ -14,11 +18,11 @@ const Home = () => {
   });
 
   useEffect(() => {
-    // Set Mapbox access token - you need to replace this with your own token
-    if (window.mapboxgl) {
-      window.mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+    if (mapboxToken && window.mapboxgl) {
+      window.mapboxgl.accessToken = mapboxToken;
+      setTokenSubmitted(true);
     }
-  }, []);
+  }, [mapboxToken]);
 
   return (
     <div className="relative h-screen w-full">
@@ -26,14 +30,29 @@ const Home = () => {
       
       <Card className="fixed bottom-0 left-0 right-0 rounded-t-xl border-t shadow-lg md:bottom-8 md:left-1/2 md:right-auto md:w-96 md:-translate-x-1/2 md:rounded-xl">
         <CardContent className="grid gap-4 p-6">
-          <Button size="lg" className="w-full">
-            <MapPin />
-            Choose safer route
-          </Button>
-          <Button variant="outline" size="lg" className="w-full">
-            <MessageSquare />
-            Send feedback
-          </Button>
+          {!tokenSubmitted ? (
+            <div className="space-y-2">
+              <Input 
+                placeholder="Enter Mapbox Public Token" 
+                value={mapboxToken}
+                onChange={(e) => setMapboxToken(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Get your token at mapbox.com
+              </p>
+            </div>
+          ) : (
+            <>
+              <Button size="lg" className="w-full">
+                <MapPin />
+                Choose safer route
+              </Button>
+              <Button variant="outline" size="lg" className="w-full">
+                <MessageSquare />
+                Send feedback
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -41,3 +60,4 @@ const Home = () => {
 };
 
 export default Home;
+
