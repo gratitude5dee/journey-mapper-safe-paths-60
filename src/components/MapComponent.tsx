@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useSafeMap } from '@/hooks/useSafeMap';
 import mapboxgl from 'mapbox-gl';
@@ -43,15 +44,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   // Initialize or update crime data source
   useEffect(() => {
-    if (!mapInstance || !crimeData) return;
+    if (!mapInstance || !earthquakeData) return;
 
     const source = mapInstance.getSource(CRIME_SOURCE_ID);
     if (source && 'setData' in source) {
-      (source as mapboxgl.GeoJSONSource).setData(crimeData);
+      (source as mapboxgl.GeoJSONSource).setData(earthquakeData);
     } else if (!source) {
       mapInstance.addSource(CRIME_SOURCE_ID, {
         type: 'geojson',
-        data: crimeData,
+        data: earthquakeData,
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 50
@@ -61,7 +62,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return () => {
       // Cleanup will be handled by individual layer effects
     };
-  }, [mapInstance, crimeData]);
+  }, [mapInstance, earthquakeData]);
 
   // Crime heatmap layer
   useEffect(() => {
