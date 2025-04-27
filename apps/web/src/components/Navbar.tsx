@@ -8,9 +8,14 @@ export function Navbar() {
     <nav className="bg-white border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold text-primary">Safe Routes</span>
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <img 
+                src="/lovable-uploads/dafb37ce-27f6-4cd4-9cd1-fc673f217220.png" 
+                alt="StreetSmart Logo" 
+                className="h-8 w-auto"
+              />
+              <span className="text-xl font-bold text-primary hidden sm:inline">Safe Routes</span>
             </Link>
           </div>
           <div className="flex items-center space-x-4">

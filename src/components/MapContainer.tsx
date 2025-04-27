@@ -5,8 +5,8 @@ import MapControls from '@/components/MapControls';
 import type { MapFeatureState } from '@/hooks/useMapFeatures';
 
 interface MapContainerProps extends MapFeatureState {
-  setShowCrimeHeatmap: (show: boolean) => void;
-  setShowCrimeCluster: (show: boolean) => void;
+  setShowHeatmap: (show: boolean) => void;
+  setShowCluster: (show: boolean) => void;
   setShowDottedLine: (show: boolean) => void;
   setShowCustomIcons: (show: boolean) => void;
   setShowDataDriven: (show: boolean) => void;
@@ -15,10 +15,10 @@ interface MapContainerProps extends MapFeatureState {
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
-  showCrimeHeatmap,
-  setShowCrimeHeatmap,
-  showCrimeCluster,
-  setShowCrimeCluster,
+  showCrimeHeatmap: showHeatmap,
+  setShowCrimeHeatmap: setShowHeatmap,
+  showCrimeCluster: showCluster,
+  setShowCrimeCluster: setShowCluster,
   showDottedLine,
   setShowDottedLine,
   showCustomIcons,
@@ -41,10 +41,10 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       <div id="map" className="absolute inset-0" />
       
       <MapControls
-        showCrimeHeatmap={showCrimeHeatmap}
-        setShowCrimeHeatmap={setShowCrimeHeatmap}
-        showCrimeCluster={showCrimeCluster}
-        setShowCrimeCluster={setShowCrimeCluster}
+        showHeatmap={showHeatmap}
+        setShowHeatmap={setShowHeatmap}
+        showCluster={showCluster}
+        setShowCluster={setShowCluster}
         showDottedLine={showDottedLine}
         setShowDottedLine={setShowDottedLine}
         showCustomIcons={showCustomIcons}
