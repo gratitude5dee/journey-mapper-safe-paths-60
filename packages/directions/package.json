@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "Mapbox GL Directions integration for Safe Routes",
   "main": "./src/index.js",
-  "types": "./src/directions.d.ts",
+  "types": "./index.d.ts",
   "license": "ISC",
   "scripts": {
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
