@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@safe-routes/directions": path.resolve(__dirname, "./packages/directions/src"), // Explicit alias for directions package
+      "@safe-routes/directions": path.resolve(__dirname, "./packages/directions"), // Adjusted to point to the package root
       "@safe-routes/map": path.resolve(__dirname, "./src/hooks"),
     },
   },
