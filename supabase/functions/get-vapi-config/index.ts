@@ -13,9 +13,14 @@ serve(async (req) => {
   }
 
   try {
-    // Get secret values
+    // Retrieve Vapi secrets from environment variables
     const VAPI_PUBLIC_KEY = Deno.env.get('VAPI_PUBLIC_KEY')
     const VAPI_ASSISTANT_ID = Deno.env.get('VAPI_ASSISTANT_ID')
+
+    // Check if secrets are present
+    if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
+      throw new Error('Vapi configuration is not fully set up')
+    }
 
     // Return the configuration
     return new Response(
@@ -31,6 +36,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error retrieving Vapi configuration:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
