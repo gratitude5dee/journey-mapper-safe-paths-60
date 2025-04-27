@@ -7,7 +7,7 @@ import MapControls from '@/components/MapControls';
 import { DirectionsInputs } from '@/components/DirectionsInputs';
 
 const initialMapOptions = {
-  style: 'mapbox://styles/mapbox/navigation-night-v1', // Changed to navy blue theme
+  style: 'mapbox://styles/mapbox/navigation-night-v1', // Navy blue theme
   center: [-122.4194, 37.7749] as [number, number],
   initialZoom: 12,
 };
@@ -110,12 +110,17 @@ const MapPage: React.FC = () => {
       />
 
       <MapControls
-        {...state}
+        showHeatmap={state.showHeatmap}
         setShowHeatmap={(show) => setState(prev => ({ ...prev, showHeatmap: show }))}
+        showCluster={state.showCluster}
         setShowCluster={(show) => setState(prev => ({ ...prev, showCluster: show }))}
+        showDottedLine={state.showDottedLine}
         setShowDottedLine={(show) => setState(prev => ({ ...prev, showDottedLine: show }))}
+        showCustomIcons={state.showCustomIcons}
         setShowCustomIcons={(show) => setState(prev => ({ ...prev, showCustomIcons: show }))}
+        showDataDriven={state.showDataDriven}
         setShowDataDriven={(show) => setState(prev => ({ ...prev, showDataDriven: show }))}
+        currentMonth={state.currentMonth}
         setCurrentMonth={(month) => setState(prev => ({ ...prev, currentMonth: month }))}
         isLoading={false}
       />
@@ -123,14 +128,19 @@ const MapPage: React.FC = () => {
       <MapComponentWithInstance
         mapId="main-map"
         options={initialMapOptions}
-        {...state}
+        showHeatmap={state.showHeatmap}
+        showCluster={state.showCluster}
+        showDottedLine={state.showDottedLine}
+        showCustomIcons={state.showCustomIcons}
+        showDataDriven={state.showDataDriven}
+        currentMonth={state.currentMonth}
+        earthquakeData={null}
+        ethnicitySourceUrl="mapbox://examples.8fgz4egr"
         onMapLoad={(map) => {
           if (!mapInstanceRef.current) {
             mapInstanceRef.current = map;
           }
         }}
-        earthquakeData={null}
-        ethnicitySourceUrl="mapbox://examples.8fgz4egr"
       />
     </div>
   );

@@ -20,5 +20,6 @@ declare module '@safe-routes/directions' {
     setDestination(destination: string | [number, number]): this;
     setProfile(profile: string): this;
     reverse(): this;
+    on(type: string, handler: (e: any) => void): this;
   }
 }

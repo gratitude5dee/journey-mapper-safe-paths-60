@@ -9,21 +9,15 @@ interface MapComponentProps {
     center: [number, number];
     initialZoom: number;
   };
-  showCrimeHeatmap: boolean;
-  showCrimeCluster: boolean;
+  showHeatmap: boolean;
+  showCluster: boolean;
   showDottedLine: boolean;
   showCustomIcons: boolean;
   showDataDriven: boolean;
-  crimeData: GeoJSON.FeatureCollection;
+  currentMonth: number;
+  earthquakeData: GeoJSON.FeatureCollection | null;
   ethnicitySourceUrl: string;
 }
-
-const MINNA_STREET_PATH = [
-  [-122.4006, 37.7875], // Start of Minna St
-  [-122.4016, 37.7867], // Near 6th St
-  [-122.4045, 37.7845], // Near 7th St
-  [-122.4065, 37.7831]  // End near 8th St
-];
 
 // Define source and layer IDs
 const CRIME_SOURCE_ID = 'crime-data';
@@ -35,12 +29,13 @@ const CRIME_POINT_LAYER_ID = 'crime-points';
 const MapComponent: React.FC<MapComponentProps> = ({
   mapId,
   options,
-  showCrimeHeatmap,
-  showCrimeCluster,
+  showHeatmap,
+  showCluster,
   showDottedLine,
   showCustomIcons,
   showDataDriven,
-  crimeData,
+  currentMonth,
+  earthquakeData,
   ethnicitySourceUrl
 }) => {
   const mapInstance = useSafeMap({ containerId: mapId, ...options });
@@ -72,7 +67,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   useEffect(() => {
     if (!mapInstance) return;
 
-    if (showCrimeHeatmap) {
+    if (showHeatmap) {
       if (!mapInstance.getLayer(CRIME_HEATMAP_LAYER_ID)) {
         mapInstance.addLayer({
           id: CRIME_HEATMAP_LAYER_ID,
@@ -112,13 +107,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
         mapInstance.removeLayer(CRIME_HEATMAP_LAYER_ID);
       }
     };
-  }, [mapInstance, showCrimeHeatmap]);
+  }, [mapInstance, showHeatmap]);
 
   // Crime clusters layer
   useEffect(() => {
     if (!mapInstance) return;
 
-    if (showCrimeCluster) {
+    if (showCluster) {
       // Cluster circles
       if (!mapInstance.getLayer(CRIME_CLUSTER_LAYER_ID)) {
         mapInstance.addLayer({
@@ -195,7 +190,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         }
       });
     };
-  }, [mapInstance, showCrimeCluster]);
+  }, [mapInstance, showCluster]);
 
   // Effect for data-driven styling (ethnicity circles)
   useEffect(() => {
@@ -439,6 +434,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
     const sourceId = 'minna-street';
     const layerId = 'minna-street-line';
+    const MINNA_STREET_PATH = [
+      [-122.4006, 37.7875], // Start of Minna St
+      [-122.4016, 37.7867], // Near 6th St
+      [-122.4045, 37.7845], // Near 7th St
+      [-122.4065, 37.7831]  // End near 8th St
+    ];
 
     // Remove existing source and layer if they exist to prevent duplicates
     if (mapInstance.getSource(sourceId)) {
