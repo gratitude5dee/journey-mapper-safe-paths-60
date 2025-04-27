@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDirections from '@safe-routes/directions';
@@ -5,38 +6,47 @@ import MapComponentWithInstance from '@/components/MapComponentWithInstance';
 import MapControls from '@/components/MapControls';
 import { DirectionsInputs } from '@/components/DirectionsInputs';
 
-// Define initial map options - centered on San Francisco
 const initialMapOptions = {
-  style: 'mapbox://styles/mapbox/dark-v11',
+  style: 'mapbox://styles/mapbox/navigation-night-v1', // Changed to navy blue theme
   center: [-122.4194, 37.7749] as [number, number],
   initialZoom: 12,
 };
 
+interface MapFeatureState {
+  showHeatmap: boolean;
+  showCluster: boolean;
+  showDottedLine: boolean;
+  showCustomIcons: boolean;
+  showDataDriven: boolean;
+  currentMonth: number;
+}
+
 const MapPage: React.FC = () => {
-  const [showHeatmap, setShowHeatmap] = useState(false);
-  const [showCluster, setShowCluster] = useState(false);
-  const [showDottedLine, setShowDottedLine] = useState(false);
-  const [showCustomIcons, setShowCustomIcons] = useState(false);
-  const [showDataDriven, setShowDataDriven] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState<number>(0);
-  const [errorEarthquakes, setErrorEarthquakes] = useState<string | null>(null);
+  const [state, setState] = useState<MapFeatureState>({
+    showHeatmap: false,
+    showCluster: false,
+    showDottedLine: false,
+    showCustomIcons: false,
+    showDataDriven: false,
+    currentMonth: 0,
+  });
   
+  const [errorEarthquakes, setErrorEarthquakes] = useState<string | null>(null);
   const directionsControlRef = useRef<MapboxDirections | null>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
-  
+
   // Effect to add/remove Directions control
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
     if (!mapboxgl.accessToken) {
-      console.error("Mapbox access token is not set. Cannot initialize Directions control.");
-      setErrorEarthquakes("Mapbox token missing, cannot show directions.");
+      console.error("Mapbox access token is not set");
+      setErrorEarthquakes("Mapbox token missing");
       return;
     }
 
     if (!directionsControlRef.current) {
-      console.log("Initializing Directions Control...");
       directionsControlRef.current = new MapboxDirections({
         accessToken: mapboxgl.accessToken,
         unit: 'metric',
@@ -50,14 +60,11 @@ const MapPage: React.FC = () => {
 
       try {
         map.addControl(directionsControlRef.current, 'top-left');
-        console.log("Directions control added.");
 
         directionsControlRef.current.on('route', (e: any) => {
           if (e.route && e.route.length > 0) {
             console.log('Route calculated:', e.route[0].distance, e.route[0].duration);
             setErrorEarthquakes(null);
-          } else {
-            console.log('Route event received, but no route data found.', e);
           }
         });
 
@@ -74,17 +81,18 @@ const MapPage: React.FC = () => {
 
     return () => {
       const control = directionsControlRef.current;
-      if (control && map && map.hasControl(control as any)) {
-        try {
-          map.removeControl(control as any);
-          console.log("Directions control removed.");
-        } catch (e) {
-          console.error("Error removing directions control:", e);
-        }
+      if (control && map.hasControl(control as any)) {
+        map.removeControl(control as any);
         directionsControlRef.current = null;
       }
     };
   }, [mapInstanceRef.current]);
+
+  const handleSetProfile = (profile: string) => {
+    if (directionsControlRef.current) {
+      directionsControlRef.current.setProfile(profile);
+    }
+  };
 
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
@@ -95,44 +103,34 @@ const MapPage: React.FC = () => {
       )}
       
       <DirectionsInputs
-        initialProfile="mapbox/driving-traffic"
         onSetOrigin={(query) => directionsControlRef.current?.setOrigin(query)}
         onSetDestination={(query) => directionsControlRef.current?.setDestination(query)}
-        onSetProfile={(profile) => directionsControlRef.current?.setProfile(profile)}
+        onSetProfile={handleSetProfile}
         onReverse={() => directionsControlRef.current?.reverse()}
       />
-      
+
       <MapControls
-        showHeatmap={showHeatmap}
-        setShowHeatmap={setShowHeatmap}
-        showCluster={showCluster}
-        setShowCluster={setShowCluster}
-        showDottedLine={showDottedLine}
-        setShowDottedLine={setShowDottedLine}
-        showCustomIcons={showCustomIcons}
-        setShowCustomIcons={setShowCustomIcons}
-        showDataDriven={showDataDriven}
-        setShowDataDriven={setShowDataDriven}
+        {...state}
+        setShowHeatmap={(show) => setState(prev => ({ ...prev, showHeatmap: show }))}
+        setShowCluster={(show) => setState(prev => ({ ...prev, showCluster: show }))}
+        setShowDottedLine={(show) => setState(prev => ({ ...prev, showDottedLine: show }))}
+        setShowCustomIcons={(show) => setState(prev => ({ ...prev, showCustomIcons: show }))}
+        setShowDataDriven={(show) => setState(prev => ({ ...prev, showDataDriven: show }))}
+        setCurrentMonth={(month) => setState(prev => ({ ...prev, currentMonth: month }))}
         isLoading={false}
       />
 
       <MapComponentWithInstance
         mapId="main-map"
         options={initialMapOptions}
-        showHeatmap={showHeatmap}
-        showCluster={showCluster}
-        showDottedLine={showDottedLine}
-        showCustomIcons={showCustomIcons}
-        showDataDriven={showDataDriven}
-        currentMonth={currentMonth}
-        crimeData={null}
-        ethnicitySourceUrl="mapbox://examples.8fgz4egr"
+        {...state}
         onMapLoad={(map) => {
           if (!mapInstanceRef.current) {
             mapInstanceRef.current = map;
-            setCurrentMonth(prev => prev);
           }
         }}
+        earthquakeData={null}
+        ethnicitySourceUrl="mapbox://examples.8fgz4egr"
       />
     </div>
   );
