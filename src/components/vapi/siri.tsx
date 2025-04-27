@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Mic, PhoneCall } from 'lucide-react';
 import ReactSiriwave, { IReactSiriwaveProps } from 'react-siriwave';
 import { motion, AnimatePresence } from 'framer-motion';
-import useVapi from '@/hooks/use-vapi';
+import useVapi from '@/hooks/use-vapi'; // Adjust the import path as needed
 import { Button } from "@/components/ui/button";
  
 // Define CurveStyle type
@@ -47,11 +47,11 @@ const Siri: React.FC<SiriProps> = ({ theme }) => {
  
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-20">
-      <div className="flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-full p-2 shadow-lg">
+      <div className="flex items-center justify-center">
         <motion.button
           key="callButton"
           onClick={handleToggleCall}
-          className="p-2 rounded-full bg-secondary shadow-md hover:bg-secondary/80"
+          className="p-2 rounded-xl bg-secondary"
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
           initial={{ x: 0 }}
@@ -59,34 +59,26 @@ const Siri: React.FC<SiriProps> = ({ theme }) => {
           transition={{ duration: 0.3 }}
           style={{ zIndex: 10, position: 'relative' }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {!isSessionActive ? (
               <motion.div
                 key="micIcon"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Mic size={24} className="text-primary-foreground" />
+                <Mic size={20} />
               </motion.div>
             ) : (
-              <motion.div
-                key="phoneIcon"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <PhoneCall size={24} className="text-primary-foreground" />
-              </motion.div>
+              <PhoneCall size={20} />
             )}
           </AnimatePresence>
         </motion.button>
         <motion.div
-          className="rounded-full p-4 overflow-hidden"
+          className="rounded-4xl p-4 overflow-hidden"
           initial={{ width: 0, opacity: 0 }}
-          animate={{ width: isSessionActive ? '240px' : '0', opacity: isSessionActive ? 1 : 0 }}
+          animate={{ width: '100%', opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.3 }}
           style={{ marginLeft: '10px' }}
