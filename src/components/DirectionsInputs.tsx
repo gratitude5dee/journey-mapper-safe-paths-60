@@ -1,12 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowUpDown, LocateFixed } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Separator } from '@/components/ui/separator';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface DirectionsInputsProps {
   onSetOrigin: (query: string) => void;
@@ -23,13 +21,13 @@ export const DirectionsInputs: React.FC<DirectionsInputsProps> = ({
   onSetDestination,
   onSetProfile,
   onReverse,
-  initialProfile,
+  initialProfile = 'mapbox/driving-traffic',
   originValue,
   destinationValue,
 }) => {
   const [origin, setOrigin] = useState(originValue || '');
   const [destination, setDestination] = useState(destinationValue || '');
-  const [profile, setProfile] = useState(initialProfile || 'mapbox/driving-traffic');
+  const [profile, setProfile] = useState(initialProfile);
 
   useEffect(() => {
     if (originValue !== undefined) setOrigin(originValue);
@@ -55,84 +53,85 @@ export const DirectionsInputs: React.FC<DirectionsInputsProps> = ({
   };
 
   return (
-    <Card className="absolute top-4 left-4 z-10 w-80 shadow-lg">
+    <Card className="absolute top-4 left-4 z-10 w-[400px] bg-white/95 backdrop-blur-sm">
       <CardContent className="p-4 space-y-4">
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="relative">
-            <Label 
-              htmlFor="origin" 
-              className="absolute -left-8 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-white"
-            >
+            <div className="absolute left-3 top-2.5 flex h-5 w-5 items-center justify-center rounded-sm bg-blue-500 text-white text-sm font-medium">
               A
-            </Label>
+            </div>
             <Input
-              id="origin"
-              placeholder="Choose starting point"
+              placeholder="Choose a starting place"
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
               onBlur={() => handleInputSubmit('origin', origin)}
               onKeyDown={(e) => handleKeyDown(e, 'origin', origin)}
-              className="pl-2"
+              className="pl-11 h-10 bg-white text-gray-600"
             />
           </div>
 
-          <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onReverse}
-              className="h-8 w-8"
-            >
-              <ArrowUpDown className="h-4 w-4" />
-            </Button>
-          </div>
-
           <div className="relative">
-            <Label 
-              htmlFor="destination" 
-              className="absolute -left-8 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white"
-            >
+            <div className="absolute left-3 top-2.5 flex h-5 w-5 items-center justify-center rounded-sm bg-violet-500 text-white text-sm font-medium">
               B
-            </Label>
+            </div>
             <Input
-              id="destination"
               placeholder="Choose destination"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               onBlur={() => handleInputSubmit('destination', destination)}
               onKeyDown={(e) => handleKeyDown(e, 'destination', destination)}
-              className="pl-2"
+              className="pl-11 h-10 bg-white text-gray-600"
             />
           </div>
         </div>
 
-        <Separator />
+        <div className="absolute right-4 top-11">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onReverse}
+            className="h-8 w-8 hover:bg-gray-100"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <RadioGroup
+        <ToggleGroup
+          type="single"
           value={profile}
           onValueChange={(value) => {
-            setProfile(value);
-            onSetProfile(value);
+            if (value) {
+              setProfile(value);
+              onSetProfile(value);
+            }
           }}
-          className="flex gap-2"
+          className="justify-start bg-gray-100 p-1 rounded-full"
         >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="mapbox/driving-traffic" id="traffic" />
-            <Label htmlFor="traffic">Traffic</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="mapbox/driving" id="driving" />
-            <Label htmlFor="driving">Driving</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="mapbox/walking" id="walking" />
-            <Label htmlFor="walking">Walking</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="mapbox/cycling" id="cycling" />
-            <Label htmlFor="cycling">Cycling</Label>
-          </div>
-        </RadioGroup>
+          <ToggleGroupItem
+            value="mapbox/driving-traffic"
+            className="rounded-full text-sm px-4 data-[state=on]:bg-white data-[state=on]:text-black"
+          >
+            Traffic
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="mapbox/driving"
+            className="rounded-full text-sm px-4 data-[state=on]:bg-white data-[state=on]:text-black"
+          >
+            Driving
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="mapbox/walking"
+            className="rounded-full text-sm px-4 data-[state=on]:bg-white data-[state=on]:text-black"
+          >
+            Walking
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="mapbox/cycling"
+            className="rounded-full text-sm px-4 data-[state=on]:bg-white data-[state=on]:text-black"
+          >
+            Cycling
+          </ToggleGroupItem>
+        </ToggleGroup>
       </CardContent>
     </Card>
   );

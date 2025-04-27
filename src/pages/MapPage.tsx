@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDirections from '@safe-routes/directions';
@@ -104,10 +103,10 @@ const MapPage: React.FC = () => {
       />
       
       <MapControls
-        showCrimeHeatmap={showHeatmap}
-        setShowCrimeHeatmap={setShowHeatmap}
-        showCrimeCluster={showCluster}
-        setShowCrimeCluster={setShowCluster}
+        showHeatmap={showHeatmap}
+        setShowHeatmap={setShowHeatmap}
+        showCluster={showCluster}
+        setShowCluster={setShowCluster}
         showDottedLine={showDottedLine}
         setShowDottedLine={setShowDottedLine}
         showCustomIcons={showCustomIcons}
@@ -120,8 +119,8 @@ const MapPage: React.FC = () => {
       <MapComponentWithInstance
         mapId="main-map"
         options={initialMapOptions}
-        showCrimeHeatmap={showHeatmap}
-        showCrimeCluster={showCluster}
+        showHeatmap={showHeatmap}
+        showCluster={showCluster}
         showDottedLine={showDottedLine}
         showCustomIcons={showCustomIcons}
         showDataDriven={showDataDriven}
