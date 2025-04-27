@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, MessageSquare } from 'lucide-react';
 import { MapContainer } from '@/components/MapContainer';
 import { useMapFeatures } from '@/hooks/useMapFeatures';
+import { AnimatedLogo } from '@/components/AnimatedLogo';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const Home = () => {
@@ -14,10 +15,12 @@ const Home = () => {
       setShowCrimeHeatmap={mapFeatures.setShowCrimeHeatmap}
       showCrimeCluster={mapFeatures.showCrimeCluster}
       setShowCrimeCluster={mapFeatures.setShowCrimeCluster}
-      showHeatmap={mapFeatures.showCrimeHeatmap}
-      setShowHeatmap={mapFeatures.setShowCrimeHeatmap}
-      showCluster={mapFeatures.showCrimeCluster}
-      setShowCluster={mapFeatures.setShowCrimeCluster}
+      showDottedLine={mapFeatures.showDottedLine}
+      setShowDottedLine={mapFeatures.setShowDottedLine}
+      showCustomIcons={mapFeatures.showCustomIcons}
+      setShowCustomIcons={mapFeatures.setShowCustomIcons}
+      showDataDriven={mapFeatures.showDataDriven}
+      setShowDataDriven={mapFeatures.setShowDataDriven}
       isLoading={false}
     >
       <Card className="fixed bottom-0 left-0 right-0 rounded-t-xl border-t shadow-lg md:bottom-8 md:left-1/2 md:right-auto md:w-96 md:-translate-x-1/2 md:rounded-xl">
@@ -32,6 +35,9 @@ const Home = () => {
           </Button>
         </CardContent>
       </Card>
+      <div className="absolute top-4 left-4 z-10">
+        <AnimatedLogo className="bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-lg" />
+      </div>
     </MapContainer>
   );
 };

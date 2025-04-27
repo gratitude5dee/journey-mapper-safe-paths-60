@@ -6,23 +6,29 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
-import React from 'react';
+import React, { useState } from 'react';
+import { AnimatedLogoIntro } from './components/AnimatedLogoIntro';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showIntro, setShowIntro] = useState(true);
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      {showIntro && <AnimatedLogoIntro onComplete={() => setShowIntro(false)} />}
+      <BrowserRouter>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
