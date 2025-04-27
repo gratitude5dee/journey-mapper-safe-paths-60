@@ -11,7 +11,7 @@ export function Navbar() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <img 
-                src="/lovable-uploads/47e29284-2945-4327-a9a9-02bcc4bfdef2.png" 
+                src="/lovable-uploads/3b98acbe-60f4-4331-887e-d9e4bc4d6c2c.png" 
                 alt="StreetSmart Logo" 
                 className="h-10 w-auto"
               />
@@ -33,4 +33,3 @@ export function Navbar() {
     </nav>
   );
 }
-

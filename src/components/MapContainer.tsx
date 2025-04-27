@@ -5,11 +5,16 @@ import MapControls from '@/components/MapControls';
 import type { MapFeatureState } from '@/hooks/useMapFeatures';
 
 interface MapContainerProps extends MapFeatureState {
-  setShowHeatmap: (show: boolean) => void;
-  setShowCluster: (show: boolean) => void;
-  setShowDottedLine: (show: boolean) => void;
-  setShowCustomIcons: (show: boolean) => void;
-  setShowDataDriven: (show: boolean) => void;
+  showHeatmap?: boolean;
+  setShowHeatmap?: (show: boolean) => void;
+  showCluster?: boolean;
+  setShowCluster?: (show: boolean) => void;
+  showDottedLine?: boolean;
+  setShowDottedLine?: (show: boolean) => void;
+  showCustomIcons?: boolean;
+  setShowCustomIcons?: (show: boolean) => void;
+  showDataDriven?: boolean;
+  setShowDataDriven?: (show: boolean) => void;
   className?: string;
   children?: React.ReactNode;
 }
@@ -58,4 +63,3 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     </div>
   );
 };
-

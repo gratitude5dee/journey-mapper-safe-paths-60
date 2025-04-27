@@ -12,7 +12,9 @@ const Home = () => {
     <MapContainer 
       {...mapFeatures} 
       isLoading={false}
+      showHeatmap={mapFeatures.showCrimeHeatmap}
       setShowHeatmap={mapFeatures.setShowCrimeHeatmap}
+      showCluster={mapFeatures.showCrimeCluster}
       setShowCluster={mapFeatures.setShowCrimeCluster}
     >
       <Card className="fixed bottom-0 left-0 right-0 rounded-t-xl border-t shadow-lg md:bottom-8 md:left-1/2 md:right-auto md:w-96 md:-translate-x-1/2 md:rounded-xl">
@@ -31,4 +33,3 @@ const Home = () => {
   );
 };
 export default Home;
-
