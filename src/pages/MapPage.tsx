@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
-import MapboxDirections from '@safe-routes/directions'; // Simplified import
+import MapboxDirections from '@safe-routes/directions'; // Using our aliased import
 import MapComponentWithInstance from '@/components/MapComponentWithInstance';
 import MapControls from '@/components/MapControls';
 import { DirectionsInputs } from '@/components/DirectionsInputs';
