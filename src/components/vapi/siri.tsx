@@ -1,20 +1,23 @@
 
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Mic, PhoneCall } from 'lucide-react';
 import ReactSiriwave from 'react-siriwave';
 import { motion, AnimatePresence } from 'framer-motion';
 import useVapi from '@/hooks/use-vapi';
 
+// Define CurveStyle type
 type CurveStyle = "ios" | "ios9";
 
 interface SiriProps {
-  theme: CurveStyle;
+  theme?: CurveStyle;
 }
 
-const Siri: React.FC<SiriProps> = ({ theme }) => {
+const Siri: React.FC<SiriProps> = ({ theme = "ios9" }) => {
   const { volumeLevel, isSessionActive, toggleCall } = useVapi();
   const [siriWaveConfig, setSiriWaveConfig] = useState({
-    theme: theme || "ios9",
+    theme,
     ratio: 1,
     speed: 0.1,
     amplitude: 0.1,
