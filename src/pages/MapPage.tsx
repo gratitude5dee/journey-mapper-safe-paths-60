@@ -1,28 +1,19 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
-import MapboxDirections from '@safe-routes/directions';
+import MapboxDirections from '@mapbox/mapbox-gl-directions';
 import MapComponentWithInstance from '@/components/MapComponentWithInstance';
 import MapControls from '@/components/MapControls';
-import { DirectionsInputs } from '@/components/DirectionsInputs';
+import { toast } from "sonner";
 
 const initialMapOptions = {
-  style: 'mapbox://styles/mapbox/navigation-night-v1', // Navy blue theme
+  style: 'mapbox://styles/mapbox/navigation-night-v1',
   center: [-122.4194, 37.7749] as [number, number],
   initialZoom: 12,
 };
 
-interface MapFeatureState {
-  showHeatmap: boolean;
-  showCluster: boolean;
-  showDottedLine: boolean;
-  showCustomIcons: boolean;
-  showDataDriven: boolean;
-  currentMonth: number;
-}
-
 const MapPage: React.FC = () => {
-  const [state, setState] = useState<MapFeatureState>({
+  const [state, setState] = useState({
     showHeatmap: false,
     showCluster: false,
     showDottedLine: false,
@@ -35,14 +26,13 @@ const MapPage: React.FC = () => {
   const directionsControlRef = useRef<MapboxDirections | null>(null);
   const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
 
-  // Effect to add/remove Directions control
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
     if (!mapboxgl.accessToken) {
       console.error("Mapbox access token is not set");
-      setErrorEarthquakes("Mapbox token missing");
+      toast.error("Mapbox token missing");
       return;
     }
 
@@ -52,9 +42,9 @@ const MapPage: React.FC = () => {
         unit: 'metric',
         profile: 'mapbox/driving-traffic',
         controls: {
-          inputs: false,
-          instructions: false,
-          profileSwitcher: false
+          inputs: true,
+          instructions: true,
+          profileSwitcher: true
         },
       });
 
@@ -64,13 +54,14 @@ const MapPage: React.FC = () => {
         directionsControlRef.current.on('route', (e: any) => {
           if (e.route && e.route.length > 0) {
             console.log('Route calculated:', e.route[0].distance, e.route[0].duration);
+            toast.success("Route calculated successfully");
             setErrorEarthquakes(null);
           }
         });
 
         directionsControlRef.current.on('error', (e: any) => {
           console.error('Directions error:', e.error);
-          setErrorEarthquakes(`Directions Error: ${e.error}`);
+          toast.error(`Directions Error: ${e.error}`);
         });
 
       } catch (e) {
@@ -81,18 +72,12 @@ const MapPage: React.FC = () => {
 
     return () => {
       const control = directionsControlRef.current;
-      if (control && map.hasControl(control as any)) {
-        map.removeControl(control as any);
+      if (control && map.hasControl(control)) {
+        map.removeControl(control);
         directionsControlRef.current = null;
       }
     };
   }, [mapInstanceRef.current]);
-
-  const handleSetProfile = (profile: string) => {
-    if (directionsControlRef.current) {
-      directionsControlRef.current.setProfile(profile);
-    }
-  };
 
   return (
     <div className="relative h-[calc(100vh-4rem)] w-full">
@@ -102,13 +87,6 @@ const MapPage: React.FC = () => {
         </div>
       )}
       
-      <DirectionsInputs
-        onSetOrigin={(query) => directionsControlRef.current?.setOrigin(query)}
-        onSetDestination={(query) => directionsControlRef.current?.setDestination(query)}
-        onSetProfile={handleSetProfile}
-        onReverse={() => directionsControlRef.current?.reverse()}
-      />
-
       <MapControls
         showHeatmap={state.showHeatmap}
         setShowHeatmap={(show) => setState(prev => ({ ...prev, showHeatmap: show }))}
