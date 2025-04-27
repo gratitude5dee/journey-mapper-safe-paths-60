@@ -10,12 +10,15 @@ const Home = () => {
   const mapFeatures = useMapFeatures();
   return (
     <MapContainer 
-      {...mapFeatures} 
-      isLoading={false}
+      showCrimeHeatmap={mapFeatures.showCrimeHeatmap}
+      setShowCrimeHeatmap={mapFeatures.setShowCrimeHeatmap}
+      showCrimeCluster={mapFeatures.showCrimeCluster}
+      setShowCrimeCluster={mapFeatures.setShowCrimeCluster}
       showHeatmap={mapFeatures.showCrimeHeatmap}
       setShowHeatmap={mapFeatures.setShowCrimeHeatmap}
       showCluster={mapFeatures.showCrimeCluster}
       setShowCluster={mapFeatures.setShowCrimeCluster}
+      isLoading={false}
     >
       <Card className="fixed bottom-0 left-0 right-0 rounded-t-xl border-t shadow-lg md:bottom-8 md:left-1/2 md:right-auto md:w-96 md:-translate-x-1/2 md:rounded-xl">
         <CardContent className="grid gap-4 p-6">

@@ -4,32 +4,44 @@ import { useSafeMap } from '@/hooks/useSafeMap';
 import MapControls from '@/components/MapControls';
 import type { MapFeatureState } from '@/hooks/useMapFeatures';
 
-interface MapContainerProps extends MapFeatureState {
-  showHeatmap?: boolean;
-  setShowHeatmap?: (show: boolean) => void;
-  showCluster?: boolean;
-  setShowCluster?: (show: boolean) => void;
+interface MapContainerProps {
+  // Extend from MapFeatureState props while making them optional in this interface
+  showCrimeHeatmap?: boolean; 
+  setShowCrimeHeatmap?: (show: boolean) => void;
+  showCrimeCluster?: boolean;
+  setShowCrimeCluster?: (show: boolean) => void;
   showDottedLine?: boolean;
   setShowDottedLine?: (show: boolean) => void;
   showCustomIcons?: boolean;
   setShowCustomIcons?: (show: boolean) => void;
   showDataDriven?: boolean;
   setShowDataDriven?: (show: boolean) => void;
+  isLoading?: boolean;
+  
+  // Additional MapContainer props
+  showHeatmap?: boolean;
+  setShowHeatmap?: (show: boolean) => void;
+  showCluster?: boolean;
+  setShowCluster?: (show: boolean) => void;
   className?: string;
   children?: React.ReactNode;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
-  showCrimeHeatmap: showHeatmap,
-  setShowCrimeHeatmap: setShowHeatmap,
-  showCrimeCluster: showCluster,
-  setShowCrimeCluster: setShowCluster,
+  showCrimeHeatmap,
+  setShowCrimeHeatmap,
+  showCrimeCluster,
+  setShowCrimeCluster,
   showDottedLine,
   setShowDottedLine,
   showCustomIcons,
   setShowCustomIcons,
   showDataDriven,
   setShowDataDriven,
+  showHeatmap = showCrimeHeatmap,
+  setShowHeatmap = setShowCrimeHeatmap,
+  showCluster = showCrimeCluster,
+  setShowCluster = setShowCrimeCluster,
   isLoading = false,
   className = "h-screen",
   children
