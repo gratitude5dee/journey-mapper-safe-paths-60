@@ -440,6 +440,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     const sourceId = 'minna-street';
     const layerId = 'minna-street-line';
 
+    // Remove existing source and layer if they exist to prevent duplicates
     if (mapInstance.getSource(sourceId)) {
       mapInstance.removeLayer(layerId);
       mapInstance.removeSource(sourceId);
@@ -458,7 +459,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       }
     });
 
-    // Add the line layer
+    // Add the line layer with ocean blue color
     mapInstance.addLayer({
       id: layerId,
       type: 'line',
