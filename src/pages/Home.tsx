@@ -6,6 +6,7 @@ import { MapContainer } from '@/components/MapContainer';
 import { useMapFeatures } from '@/hooks/useMapFeatures';
 import { AnimatedLogo } from '@/components/AnimatedLogo';
 import { SafeRouteOptions } from '@/components/SafeRouteOptions';
+import Siri from '@/components/vapi/siri';
 import { useState } from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -54,13 +55,18 @@ const Home = () => {
       setShowDataDriven={mapFeatures.setShowDataDriven}
       isLoading={false}
     >
+      <div className="absolute top-4 left-4 z-10">
+        <AnimatedLogo className="bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-lg" />
+      </div>
+
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 md:bottom-[calc(theme(spacing.8)_+_9rem)]">
+        <Siri theme="ios9" />
+      </div>
+
       <SafeRouteOptions 
         options={mockRouteOptions}
         onSelectRoute={setSelectedRoute}
       />
-      <div className="absolute top-4 left-4 z-10">
-        <AnimatedLogo className="bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-lg" />
-      </div>
     </MapContainer>
   );
 };
