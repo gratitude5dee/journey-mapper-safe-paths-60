@@ -4,9 +4,10 @@ import { Map } from 'mapbox-gl';
 import MapComponent from './MapComponent';
 import { useSafeMap } from '../hooks/useSafeMap';
 
-interface MapComponentWithInstanceProps extends Omit<React.ComponentProps<typeof MapComponent>, 'earthquakeData'> {
+interface MapComponentWithInstanceProps extends Omit<React.ComponentProps<typeof MapComponent>, 'crimeData'> {
   onMapLoad: (map: Map) => void;
   crimeData?: GeoJSON.FeatureCollection | null;
+  currentMonth: number;
 }
 
 const MapComponentWithInstance: React.FC<MapComponentWithInstanceProps> = ({ onMapLoad, crimeData, ...props }) => {
@@ -31,7 +32,7 @@ const MapComponentWithInstance: React.FC<MapComponentWithInstanceProps> = ({ onM
     }
   }, [mapInstance, onMapLoad]);
 
-  // Pass earthquakeData as crimeData to maintain compatibility
+  // Pass crimeData to MapComponent
   return <MapComponent {...props} crimeData={crimeData || null} />;
 };
 
