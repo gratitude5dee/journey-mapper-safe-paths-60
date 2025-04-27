@@ -46,7 +46,7 @@ const Siri: React.FC<SiriProps> = ({ theme }) => {
   };
  
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-20">
+    <div className="flex flex-col items-center justify-center min-h-full">
       <div className="flex items-center justify-center">
         <motion.button
           key="callButton"
