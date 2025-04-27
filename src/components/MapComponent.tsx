@@ -18,6 +18,13 @@ interface MapComponentProps {
   ethnicitySourceUrl: string;
 }
 
+const MINNA_STREET_PATH = [
+  [-122.4006, 37.7875], // Start of Minna St
+  [-122.4016, 37.7867], // Near 6th St
+  [-122.4045, 37.7845], // Near 7th St
+  [-122.4065, 37.7831]  // End near 8th St
+];
+
 // Define source and layer IDs
 const CRIME_SOURCE_ID = 'crime-data';
 const CRIME_HEATMAP_LAYER_ID = 'crime-heatmap';
@@ -425,6 +432,57 @@ const MapComponent: React.FC<MapComponentProps> = ({
       markers.forEach(marker => marker.remove());
     };
   }, [mapInstance, showCustomIcons]);
+
+  // Add effect for Minna Street path
+  useEffect(() => {
+    if (!mapInstance) return;
+
+    const sourceId = 'minna-street';
+    const layerId = 'minna-street-line';
+
+    if (mapInstance.getSource(sourceId)) {
+      mapInstance.removeLayer(layerId);
+      mapInstance.removeSource(sourceId);
+    }
+
+    // Add the source for Minna Street path
+    mapInstance.addSource(sourceId, {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: MINNA_STREET_PATH
+        }
+      }
+    });
+
+    // Add the line layer
+    mapInstance.addLayer({
+      id: layerId,
+      type: 'line',
+      source: sourceId,
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#0EA5E9', // Ocean blue color
+        'line-width': 4,
+        'line-opacity': 0.8
+      }
+    });
+
+    return () => {
+      if (mapInstance.getLayer(layerId)) {
+        mapInstance.removeLayer(layerId);
+      }
+      if (mapInstance.getSource(sourceId)) {
+        mapInstance.removeSource(sourceId);
+      }
+    };
+  }, [mapInstance]);
 
   return <div id={mapId} className="h-full w-full" />;
 };
