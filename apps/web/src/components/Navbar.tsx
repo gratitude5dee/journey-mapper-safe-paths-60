@@ -11,11 +11,11 @@ export function Navbar() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <img 
-                src="/lovable-uploads/dafb37ce-27f6-4cd4-9cd1-fc673f217220.png" 
+                src="/lovable-uploads/47e29284-2945-4327-a9a9-02bcc4bfdef2.png" 
                 alt="StreetSmart Logo" 
-                className="h-8 w-auto"
+                className="h-10 w-auto"
               />
-              <span className="text-xl font-bold text-primary hidden sm:inline">Safe Routes</span>
+              <span className="text-xl font-bold text-primary hidden sm:inline">StreetSmart</span>
             </Link>
           </div>
           <div className="flex items-center space-x-4">
@@ -33,3 +33,4 @@ export function Navbar() {
     </nav>
   );
 }
+
