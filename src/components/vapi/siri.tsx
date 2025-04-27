@@ -7,7 +7,6 @@ import ReactSiriwave from 'react-siriwave';
 import { motion, AnimatePresence } from 'framer-motion';
 import useVapi from '@/hooks/use-vapi';
 
-// Define CurveStyle type
 type CurveStyle = "ios" | "ios9";
 
 interface SiriProps {
@@ -17,50 +16,54 @@ interface SiriProps {
 const Siri: React.FC<SiriProps> = ({ theme = "ios9" }) => {
   const { volumeLevel, isSessionActive, toggleCall } = useVapi();
   const [siriWaveConfig, setSiriWaveConfig] = useState({
-    theme,
+    theme: theme,
     ratio: 1,
-    speed: 0.1,
-    amplitude: 0.1,
-    frequency: 2,
+    speed: 0.2,
+    amplitude: 1,
+    frequency: 6,
     color: '#fff',
     cover: false,
-    width: 200,
-    height: 50,
+    width: 300,
+    height: 100,
     autostart: true,
-    pixelDepth: 0.02,
+    pixelDepth: 1,
     lerpSpeed: 0.1,
   });
 
   useEffect(() => {
-    const calculatedAmplitude = isSessionActive ? Math.min(0.1 + volumeLevel * 5, 0.8) : 0.05;
-    const calculatedSpeed = isSessionActive ? Math.max(0.05, volumeLevel * 0.3) : 0.02;
-    const calculatedFrequency = isSessionActive ? Math.max(2, Math.min(volumeLevel * 10, 8)) : 2;
-
-    setSiriWaveConfig(prev => ({
-      ...prev,
-      amplitude: calculatedAmplitude,
-      speed: calculatedSpeed,
-      frequency: calculatedFrequency,
+    setSiriWaveConfig(prevConfig => ({
+      ...prevConfig,
+      amplitude: isSessionActive ? (volumeLevel > 0.01 ? volumeLevel * 7.5 : 0) : 0,
+      speed: isSessionActive ? (volumeLevel > 0.5 ? volumeLevel * 10 : 0) : 0,
+      frequency: isSessionActive ? (volumeLevel > 0.01 ? volumeLevel * 5 : 0) : (volumeLevel > 0.5 ? volumeLevel * 10 : 0),
     }));
   }, [volumeLevel, isSessionActive]);
 
+  const handleToggleCall = () => {
+    toggleCall();
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-full p-1 shadow-lg">
+    <div className="flex flex-col items-center justify-center min-h-full">
+      <div className="flex items-center justify-center">
         <motion.button
-          onClick={toggleCall}
-          className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200 flex items-center justify-center w-10 h-10"
+          key="callButton"
+          onClick={handleToggleCall}
+          className="p-2 rounded-xl bg-secondary"
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
+          initial={{ x: 0 }}
+          animate={{ x: isSessionActive ? -40 : 0 }}
+          transition={{ duration: 0.3 }}
           style={{ zIndex: 10, position: 'relative' }}
         >
           <AnimatePresence mode="wait">
             {!isSessionActive ? (
               <motion.div
                 key="micIcon"
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 90 }}
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
                 <Mic size={20} />
@@ -68,9 +71,9 @@ const Siri: React.FC<SiriProps> = ({ theme = "ios9" }) => {
             ) : (
               <motion.div
                 key="phoneIcon"
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 90 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
                 <PhoneCall size={20} />
@@ -79,15 +82,14 @@ const Siri: React.FC<SiriProps> = ({ theme = "ios9" }) => {
           </AnimatePresence>
         </motion.button>
         <motion.div
-          className="overflow-hidden flex items-center justify-center ml-1"
+          className="rounded-4xl p-4 overflow-hidden"
           initial={{ width: 0, opacity: 0 }}
-          animate={{
-            width: isSessionActive ? siriWaveConfig.width : 0,
-            opacity: isSessionActive ? 1 : 0
-          }}
+          animate={{ width: '100%', opacity: 1 }}
+          exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.3 }}
+          style={{ marginLeft: '10px' }}
         >
-          {isSessionActive && <ReactSiriwave {...siriWaveConfig} />}
+          <ReactSiriwave {...siriWaveConfig} />
         </motion.div>
       </div>
     </div>

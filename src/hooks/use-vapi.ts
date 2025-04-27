@@ -1,63 +1,86 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import Vapi from '@vapi-ai/web';
 
 const useVapi = () => {
-  const [isSessionActive, setIsSessionActive] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(0);
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [conversation, setConversation] = useState<{ role: string; text: string }[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const vapiRef = useRef<any>(null);
 
-  // Initialize Vapi when the hook is first used
-  useEffect(() => {
-    const initVapi = async () => {
-      try {
-        const { data: { VAPI_PUBLIC_KEY, VAPI_ASSISTANT_ID } } = await supabase.functions.invoke('get-vapi-config');
-        
-        // Initialize Vapi here with the retrieved keys
-        console.log('Vapi initialized with keys:', { VAPI_PUBLIC_KEY, VAPI_ASSISTANT_ID });
+  const initializeVapi = useCallback(async () => {
+    try {
+      // Get configuration from Supabase edge function
+      const { data: { VAPI_PUBLIC_KEY, VAPI_ASSISTANT_ID } } = await supabase.functions.invoke('get-vapi-config');
+      
+      if (!vapiRef.current && VAPI_PUBLIC_KEY && VAPI_ASSISTANT_ID) {
+        const vapiInstance = new Vapi(VAPI_PUBLIC_KEY);
+        vapiRef.current = { instance: vapiInstance, assistantId: VAPI_ASSISTANT_ID };
+
+        vapiInstance.on('call-start', () => {
+          setIsSessionActive(true);
+        });
+
+        vapiInstance.on('call-end', () => {
+          setIsSessionActive(false);
+          setConversation([]); // Reset conversation on call end
+        });
+
+        vapiInstance.on('volume-level', (volume: number) => {
+          setVolumeLevel(volume);
+        });
+
+        vapiInstance.on('message', (message: any) => {
+          if (message.type === 'transcript' && message.transcriptType === 'final') {
+            setConversation((prev) => [
+              ...prev,
+              { role: message.role, text: message.transcript },
+            ]);
+          }
+        });
+
+        vapiInstance.on('error', (e: Error) => {
+          console.error('Vapi error:', e);
+        });
+
         setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize Vapi:', error);
       }
-    };
-
-    initVapi();
+    } catch (error) {
+      console.error('Failed to initialize Vapi:', error);
+    }
   }, []);
 
-  // Simulate volume changes when active
   useEffect(() => {
-    let intervalId: number | undefined;
-    if (isSessionActive) {
-      intervalId = window.setInterval(() => {
-        // Simulate fluctuating volume
-        setVolumeLevel(Math.random() * 0.6 + 0.1);
-      }, 150);
-    } else {
-      setVolumeLevel(0);
-    }
+    initializeVapi();
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (vapiRef.current?.instance) {
+        vapiRef.current.instance.stop();
+        vapiRef.current = null;
       }
     };
-  }, [isSessionActive]);
+  }, [initializeVapi]);
 
-  const toggleCall = useCallback(() => {
-    if (!isInitialized) {
-      console.warn('Vapi not yet initialized');
+  const toggleCall = async () => {
+    if (!vapiRef.current?.instance || !vapiRef.current?.assistantId) {
+      console.warn('Vapi not initialized');
       return;
     }
-    console.log("Toggling Vapi call...");
-    setIsSessionActive(prev => !prev);
-  }, [isInitialized]);
 
-  return {
-    volumeLevel,
-    isSessionActive,
-    toggleCall,
-    isInitialized,
+    try {
+      if (isSessionActive) {
+        await vapiRef.current.instance.stop();
+      } else {
+        await vapiRef.current.instance.start(vapiRef.current.assistantId);
+      }
+    } catch (err) {
+      console.error('Error toggling Vapi session:', err);
+    }
   };
+
+  return { volumeLevel, isSessionActive, conversation, toggleCall, isInitialized };
 };
 
 export default useVapi;
