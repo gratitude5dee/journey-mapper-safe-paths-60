@@ -6,8 +6,8 @@ import { MapContainer } from '@/components/MapContainer';
 import { useMapFeatures } from '@/hooks/useMapFeatures';
 import { AnimatedLogo } from '@/components/AnimatedLogo';
 import { SafeRouteOptions } from '@/components/SafeRouteOptions';
-import Siri from '@/components/vapi/siri';
 import { useState } from 'react';
+import Siri from '@/components/vapi/siri';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
@@ -61,7 +61,8 @@ const Home = () => {
           <AnimatedLogo className="bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-lg" />
         </div>
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 md:bottom-[calc(theme(spacing.8)_+_9rem)]">
+        {/* Move Siri to top center */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
           <Siri theme="ios9" />
         </div>
 
