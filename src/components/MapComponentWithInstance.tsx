@@ -4,11 +4,12 @@ import { Map } from 'mapbox-gl';
 import MapComponent from './MapComponent';
 import { useSafeMap } from '../hooks/useSafeMap';
 
-interface MapComponentWithInstanceProps extends React.ComponentProps<typeof MapComponent> {
+interface MapComponentWithInstanceProps extends Omit<React.ComponentProps<typeof MapComponent>, 'earthquakeData'> {
   onMapLoad: (map: Map) => void;
+  crimeData?: GeoJSON.FeatureCollection | null;
 }
 
-const MapComponentWithInstance: React.FC<MapComponentWithInstanceProps> = ({ onMapLoad, ...props }) => {
+const MapComponentWithInstance: React.FC<MapComponentWithInstanceProps> = ({ onMapLoad, crimeData, ...props }) => {
   const mapInstance = useSafeMap({ containerId: props.mapId, ...props.options });
 
   useEffect(() => {
@@ -30,7 +31,8 @@ const MapComponentWithInstance: React.FC<MapComponentWithInstanceProps> = ({ onM
     }
   }, [mapInstance, onMapLoad]);
 
-  return <MapComponent {...props} />;
+  // Pass earthquakeData as crimeData to maintain compatibility
+  return <MapComponent {...props} crimeData={crimeData || null} />;
 };
 
 export default MapComponentWithInstance;

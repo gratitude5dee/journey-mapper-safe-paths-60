@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDirections from '@safe-routes/directions';
@@ -103,31 +104,29 @@ const MapPage: React.FC = () => {
       />
       
       <MapControls
-        showHeatmap={showHeatmap}
-        setShowHeatmap={setShowHeatmap}
-        showCluster={showCluster}
-        setShowCluster={setShowCluster}
+        showCrimeHeatmap={showHeatmap}
+        setShowCrimeHeatmap={setShowHeatmap}
+        showCrimeCluster={showCluster}
+        setShowCrimeCluster={setShowCluster}
         showDottedLine={showDottedLine}
         setShowDottedLine={setShowDottedLine}
         showCustomIcons={showCustomIcons}
         setShowCustomIcons={setShowCustomIcons}
         showDataDriven={showDataDriven}
         setShowDataDriven={setShowDataDriven}
-        currentMonth={currentMonth}
-        setCurrentMonth={setCurrentMonth}
         isLoading={false}
       />
 
       <MapComponentWithInstance
         mapId="main-map"
         options={initialMapOptions}
-        showHeatmap={showHeatmap}
-        showCluster={showCluster}
+        showCrimeHeatmap={showHeatmap}
+        showCrimeCluster={showCluster}
         showDottedLine={showDottedLine}
         showCustomIcons={showCustomIcons}
         showDataDriven={showDataDriven}
         currentMonth={currentMonth}
-        earthquakeData={null}
+        crimeData={null}
         ethnicitySourceUrl="mapbox://examples.8fgz4egr"
         onMapLoad={(map) => {
           if (!mapInstanceRef.current) {

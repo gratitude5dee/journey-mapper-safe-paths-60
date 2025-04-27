@@ -208,6 +208,26 @@ export default class MapboxDirections {
     }
     return this;
   }
+  
+  setProfile(profile) {
+    if (typeof profile === 'string') {
+      console.log('Setting profile:', profile);
+      this.store.dispatch(this.actions.setProfile(profile));
+    }
+    return this;
+  }
+  
+  reverse() {
+    const state = this.store.getState();
+    const origin = state.destination;
+    const destination = state.origin;
+    
+    if (origin) this.store.dispatch(this.actions.originPoint(origin));
+    if (destination) this.store.dispatch(this.actions.destinationPoint(destination));
+    
+    console.log('Directions reversed');
+    return this;
+  }
 
   removeRoutes() {
     const geojson = {
