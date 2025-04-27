@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDirections from '@mapbox/mapbox-gl-directions';
 import MapComponentWithInstance from '@/components/MapComponentWithInstance';
 import MapControls from '@/components/MapControls';
+import DirectionsControl from '@/components/DirectionsControl';
 import { toast } from "sonner";
 
 const initialMapOptions = {
@@ -86,6 +86,8 @@ const MapPage: React.FC = () => {
           {errorEarthquakes}
         </div>
       )}
+      
+      <DirectionsControl />
       
       <MapControls
         showHeatmap={state.showHeatmap}
