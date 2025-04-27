@@ -62,6 +62,19 @@ const Home = () => {
             <Siri theme="ios9" />
           </div>
 
+          <Card className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md rounded-xl border shadow-lg">
+            <CardContent className="grid gap-4 p-6">
+              <Button size="lg" className="w-full">
+                <MapPin className="mr-2 h-4 w-4" />
+                Choose safer route
+              </Button>
+              <Button variant="outline" size="lg" className="w-full">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Send feedback
+              </Button>
+            </CardContent>
+          </Card>
+
           <SafeRouteOptions options={mockRouteOptions} onSelectRoute={setSelectedRoute} />
         </MapContainer>
       </TooltipProvider>

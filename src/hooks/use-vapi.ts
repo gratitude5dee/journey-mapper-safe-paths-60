@@ -20,10 +20,12 @@ const useVapi = () => {
         vapiRef.current = { instance: vapiInstance, assistantId: VAPI_ASSISTANT_ID };
 
         vapiInstance.on('call-start', () => {
+          console.log('Vapi call started');
           setIsSessionActive(true);
         });
 
         vapiInstance.on('call-end', () => {
+          console.log('Vapi call ended');
           setIsSessionActive(false);
           setConversation([]); // Reset conversation on call end
         });
@@ -33,6 +35,7 @@ const useVapi = () => {
         });
 
         vapiInstance.on('message', (message: any) => {
+          console.log('Vapi message:', message);
           if (message.type === 'transcript' && message.transcriptType === 'final') {
             setConversation((prev) => [
               ...prev,
@@ -46,6 +49,7 @@ const useVapi = () => {
         });
 
         setIsInitialized(true);
+        console.log('Vapi initialized successfully');
       }
     } catch (error) {
       console.error('Failed to initialize Vapi:', error);
@@ -71,8 +75,10 @@ const useVapi = () => {
 
     try {
       if (isSessionActive) {
+        console.log('Stopping Vapi call');
         await vapiRef.current.instance.stop();
       } else {
+        console.log('Starting Vapi call with assistant ID:', vapiRef.current.assistantId);
         await vapiRef.current.instance.start(vapiRef.current.assistantId);
       }
     } catch (err) {
