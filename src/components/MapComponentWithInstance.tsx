@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Map } from 'mapbox-gl';
 import MapComponent from './MapComponent';
-import { useSafeMap } from '@safe-routes/map';
+import { useSafeMap } from '../hooks/useSafeMap';
 
 interface MapComponentWithInstanceProps extends React.ComponentProps<typeof MapComponent> {
   onMapLoad: (map: Map) => void;
