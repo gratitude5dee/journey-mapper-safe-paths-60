@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, MessageSquare } from 'lucide-react';
@@ -9,6 +10,7 @@ import { useState } from 'react';
 import Siri from '@/components/vapi/siri';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { TooltipProvider } from '@/components/ui/tooltip';
+
 const mockRouteOptions = [{
   id: '1',
   safetyScore: 9,
@@ -31,22 +33,40 @@ const mockRouteOptions = [{
   description: 'Most direct, passes through areas with higher reported incidents',
   via: 'Valencia Street'
 }];
+
 const Home = () => {
   const mapFeatures = useMapFeatures();
   const [selectedRoute, setSelectedRoute] = useState(mockRouteOptions[0]);
-  return <TooltipProvider>
-      <MapContainer showCrimeHeatmap={mapFeatures.showCrimeHeatmap} setShowCrimeHeatmap={mapFeatures.setShowCrimeHeatmap} showCrimeCluster={mapFeatures.showCrimeCluster} setShowCrimeCluster={mapFeatures.setShowCrimeCluster} showDottedLine={mapFeatures.showDottedLine} setShowDottedLine={mapFeatures.setShowDottedLine} showCustomIcons={mapFeatures.showCustomIcons} setShowCustomIcons={mapFeatures.setShowCustomIcons} showDataDriven={mapFeatures.showDataDriven} setShowDataDriven={mapFeatures.setShowDataDriven} isLoading={false}>
-        <div className="absolute top-4 left-4 z-10 bg-slate-900">
-          <AnimatedLogo className="bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-lg" />
-        </div>
+  
+  return (
+    <div className="bg-transparent">
+      <TooltipProvider>
+        <MapContainer 
+          showCrimeHeatmap={mapFeatures.showCrimeHeatmap} 
+          setShowCrimeHeatmap={mapFeatures.setShowCrimeHeatmap} 
+          showCrimeCluster={mapFeatures.showCrimeCluster} 
+          setShowCrimeCluster={mapFeatures.setShowCrimeCluster} 
+          showDottedLine={mapFeatures.showDottedLine} 
+          setShowDottedLine={mapFeatures.setShowDottedLine} 
+          showCustomIcons={mapFeatures.showCustomIcons} 
+          setShowCustomIcons={mapFeatures.setShowCustomIcons} 
+          showDataDriven={mapFeatures.showDataDriven} 
+          setShowDataDriven={mapFeatures.setShowDataDriven} 
+          isLoading={false}
+        >
+          <div className="absolute top-4 left-4 z-10 bg-transparent">
+            <AnimatedLogo className="bg-white/80 backdrop-blur-sm p-2 rounded-lg shadow-lg" />
+          </div>
 
-        {/* Move Siri to top center */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-          <Siri theme="ios9" />
-        </div>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+            <Siri theme="ios9" />
+          </div>
 
-        <SafeRouteOptions options={mockRouteOptions} onSelectRoute={setSelectedRoute} />
-      </MapContainer>
-    </TooltipProvider>;
+          <SafeRouteOptions options={mockRouteOptions} onSelectRoute={setSelectedRoute} />
+        </MapContainer>
+      </TooltipProvider>
+    </div>
+  );
 };
+
 export default Home;
