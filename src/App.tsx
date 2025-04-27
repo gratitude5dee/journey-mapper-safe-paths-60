@@ -16,15 +16,17 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      {showIntro && <AnimatedLogoIntro onComplete={() => setShowIntro(false)} />}
       <BrowserRouter>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {showIntro && <AnimatedLogoIntro onComplete={() => setShowIntro(false)} />}
+          {!showIntro && (
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          )}
         </TooltipProvider>
       </BrowserRouter>
     </QueryClientProvider>
