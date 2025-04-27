@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@safe-routes/map": path.resolve(__dirname, "./src/hooks"), // Updated path to local hooks
-      "@safe-routes/directions": path.resolve(__dirname, "./packages/directions"),
+      "@safe-routes/directions": path.resolve(__dirname, "./packages/directions/src"),
     },
   },
 }));
