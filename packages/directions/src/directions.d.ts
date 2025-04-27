@@ -1,4 +1,5 @@
 
+// Ensure comprehensive type declarations
 declare module '@safe-routes/directions' {
   import { Control } from 'mapbox-gl';
 
