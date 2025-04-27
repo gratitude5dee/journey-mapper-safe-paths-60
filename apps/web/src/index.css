@@ -1,27 +1,16 @@
 
 @import 'mapbox-gl/dist/mapbox-gl.css';
+@import '@safe-routes/directions/src/mapbox-gl-directions.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 210 40% 98%;
-    --foreground: 217 33% 17%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 160 84% 39%;
-    --secondary-foreground: 210 40% 98%;
-    --accent: 24 95% 53%;
-    --accent-foreground: 210 40% 98%;
-    --muted: 217 33% 97%;
-    --muted-foreground: 215 16% 47%;
-    --border: 214 32% 91%;
-    --radius: 0.5rem;
+  * {
+    @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
   }
 }
